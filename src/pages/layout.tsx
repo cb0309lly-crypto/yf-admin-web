@@ -47,9 +47,9 @@ function createRouteGuard(to: Router.Route, roles: string[], isSuper: boolean, p
   const needLogin = !to.handle.constant;
   const routeRoles = to.handle.roles || [];
 
-  const hasRole = roles.some(role => routeRoles.includes(role));
+  // const hasRole = roles.some(role => routeRoles.includes(role));
 
-  const hasAuth = isSuper || !routeRoles.length || hasRole;
+  const hasAuth = isSuper || !routeRoles.length;
 
   // if it is login route when logged in, then switch to the root page
   if (to.fullPath.includes('login') && to.pathname !== '/login-out' && isLogin) {

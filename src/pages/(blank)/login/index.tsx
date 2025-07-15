@@ -9,14 +9,14 @@ interface Account {
   key: AccountKey;
   label: string;
   password: string;
-  userName: string;
+  username: string;
 }
 
-type LoginParams = Pick<Account, 'password' | 'userName'>;
+type LoginParams = Pick<Account, 'password' | 'username'>;
 
 const INITIAL_VALUES = {
   password: '123456',
-  userName: 'Soybean'
+  username: 'admin'
 };
 
 const PwdLogin = () => {
@@ -37,19 +37,19 @@ const PwdLogin = () => {
       key: 'super',
       label: t('page.login.pwdLogin.superAdmin'),
       password: '123456',
-      userName: 'Super'
+      username: 'Super'
     },
     {
       key: 'admin',
       label: t('page.login.pwdLogin.admin'),
       password: '123456',
-      userName: 'Admin'
+      username: 'Admin'
     },
     {
       key: 'user',
       label: t('page.login.pwdLogin.user'),
       password: '123456',
-      userName: 'User'
+      username: 'User'
     }
   ];
 
@@ -83,7 +83,7 @@ const PwdLogin = () => {
         initialValues={INITIAL_VALUES}
       >
         <AForm.Item
-          name="userName"
+          name="username"
           rules={userNameRules}
         >
           <Input />

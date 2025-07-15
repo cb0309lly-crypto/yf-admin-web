@@ -1,4 +1,4 @@
-const route: App.I18n.Schema['translation']['route'] = {
+const route: any = {
   '(base)_about': 'About',
   '(base)_function': 'System Function',
   '(base)_function_event-bus': 'Event Bus Demo',

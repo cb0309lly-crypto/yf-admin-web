@@ -54,8 +54,9 @@ declare namespace Api {
    */
   namespace Auth {
     interface LoginToken {
+      access_token: string;
       refreshToken: string;
-      token: string;
+      token: string; // 新增，兼容后端返回
     }
 
     interface UserInfo {

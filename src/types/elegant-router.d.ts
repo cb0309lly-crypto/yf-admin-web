@@ -35,12 +35,16 @@ declare module "@soybean-react/vite-plugin-react-router" {
     "(base)_function_hide-child_one": "/function/hide-child/one";
     "(base)_function_hide-child_three": "/function/hide-child/three";
     "(base)_function_hide-child_two": "/function/hide-child/two";
+    "(base)_function_logistics": "/function/logistics";
     "(base)_function_multi-tab": "/function/multi-tab";
+    "(base)_function_order": "/function/order";
+    "(base)_function_product": "/function/product";
     "(base)_function_request": "/function/request";
     "(base)_function_super-page": "/function/super-page";
     "(base)_function_tab": "/function/tab";
     "(base)_function_toggle-auth": "/function/toggle-auth";
     "(base)_function_use-request": "/function/use-request";
+    "(base)_function_user": "/function/user";
     "(base)_home": "/home";
     "(base)_manage": "/manage";
     "(base)_manage_role": "/manage/role";
@@ -141,12 +145,16 @@ declare module "@soybean-react/vite-plugin-react-router" {
     | "(base)_function_hide-child_three"
     | "(base)_function_hide-child_two"
     | "(base)_function"
+    | "(base)_function_logistics"
     | "(base)_function_multi-tab"
+    | "(base)_function_order"
+    | "(base)_function_product"
     | "(base)_function_request"
     | "(base)_function_super-page"
     | "(base)_function_tab"
     | "(base)_function_toggle-auth"
     | "(base)_function_use-request"
+    | "(base)_function_user"
     | "(base)_home"
     | "(base)"
     | "(base)_manage"

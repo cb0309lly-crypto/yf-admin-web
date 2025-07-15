@@ -92,7 +92,7 @@ const ToggleAuth = () => {
 
     resetRoutes();
 
-    await toLogin({ password: account.password, userName: account.userName }, false);
+    await toLogin({ password: account.password, username: account.userName }, false);
 
     initTab(themeSettings.tab.cache, updateTabs);
 

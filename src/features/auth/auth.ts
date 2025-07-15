@@ -46,24 +46,25 @@ export function useInitAuth() {
 
   const redirectUrl = searchParams.get('redirect');
 
-  async function toLogin({ password, userName }: { password: string; userName: string }, redirect = true) {
+  async function toLogin({ password, username }: { password: string; username: string }, redirect = true) {
     if (loading) return;
 
     startLoading();
-    const { data: loginToken, error } = await fetchLogin(userName, password);
+    const { data: loginToken, error } = await fetchLogin(username, password);
 
     if (!error) {
-      localStg.set('token', loginToken.token);
+      localStg.set('token', loginToken.access_token);
       localStg.set('refreshToken', loginToken.refreshToken);
 
-      const { data: info, error: userInfoError } = await fetchGetUserInfo();
+      const { data } = await fetchGetUserInfo();
+      const userInfoError = !data;
 
       if (!userInfoError) {
         // 2. store user info
-        localStg.set('userInfo', info);
+        localStg.set('userInfo', data);
 
-        dispatch(setToken(loginToken.token));
-        dispatch(setUserInfo(info));
+        dispatch(setToken(loginToken.access_token));
+        dispatch(setUserInfo(data));
 
         if (redirect) {
           if (redirectUrl) {
@@ -74,7 +75,7 @@ export function useInitAuth() {
         }
 
         window.$notification?.success({
-          description: t('page.login.common.welcomeBack', { userName: info.userName }),
+          description: t('page.login.common.welcomeBack', { userName: data.username }),
           message: t('page.login.common.loginSuccess')
         });
       }
