@@ -23,28 +23,36 @@ export const generatedRoutes: ElegantConstRoute[] = [
         name: '(base)',
         children: [
           {
+            matchedFiles: [null, '/src/pages/(base)/function/index.tsx', null, null],
+            name: '(base)_function',
+            path: '/function',
+            handle: { i18nKey: 'route.(base)_function', title: '(base)_function' },
+            children: [
+              {
+                matchedFiles: [null, '/src/pages/(base)/function/logistics/index.tsx', null, null],
+                name: '(base)_function_logistics',
+                path: '/function/logistics',
+                handle: { i18nKey: 'route.(base)_function_logistics', title: '(base)_function_logistics' }
+              },
+              {
+                matchedFiles: [null, '/src/pages/(base)/function/order/index.tsx', null, null],
+                name: '(base)_function_order',
+                path: '/function/order',
+                handle: { i18nKey: 'route.(base)_function_order', title: '(base)_function_order' }
+              },
+              {
+                matchedFiles: [null, '/src/pages/(base)/function/product/index.tsx', null, null],
+                name: '(base)_function_product',
+                path: '/function/product',
+                handle: { i18nKey: 'route.(base)_function_product', title: '(base)_function_product' }
+              }
+            ]
+          },
+          {
             matchedFiles: [null, '/src/pages/(base)/home/index.tsx', null, null],
             name: '(base)_home',
             path: '/home',
             handle: { i18nKey: 'route.(base)_home', icon: 'mdi:monitor-dashboard', order: 1, title: 'home' }
-          },
-          {
-            matchedFiles: [null, '/src/pages/(base)/function/product/index.tsx', null, null],
-            name: '(base)_function_product',
-            path: '/function/product',
-            handle: { i18nKey: 'route.(base)_function_product', title: '(base)_function_product', order: 2, constant: true }
-          },
-          {
-            matchedFiles: [null, '/src/pages/(base)/function/order/index.tsx', null, null],
-            name: '(base)_function_order',
-            path: '/function/order',
-            handle: { i18nKey: 'route.(base)_function_order', title: '(base)_function_order', order: 3, constant: true }
-          },
-          {
-            matchedFiles: [null, '/src/pages/(base)/function/logistics/index.tsx', null, null],
-            name: '(base)_function_logistics',
-            path: '/function/logistics',
-            handle: { i18nKey: 'route.(base)_function_logistics', title: '(base)_function_logistics', order: 4, constant: true }
           }
         ],
         path: null
@@ -87,24 +95,6 @@ export const generatedRoutes: ElegantConstRoute[] = [
           }
         ],
         path: null
-      },
-      {
-        matchedFiles: [null, '/src/pages/_builtin/403/index.tsx', null, null],
-        name: '403',
-        path: '/403',
-        handle: { i18nKey: 'route.403', title: '403', constant: true }
-      },
-      {
-        matchedFiles: [null, '/src/pages/_builtin/404/index.tsx', null, null],
-        name: '404',
-        path: '/404',
-        handle: { i18nKey: 'route.404', title: '404', constant: true }
-      },
-      {
-        matchedFiles: [null, '/src/pages/_builtin/500/index.tsx', null, null],
-        name: '500',
-        path: '/500',
-        handle: { i18nKey: 'route.500', title: '500', constant: true }
       },
       {
         matchedFiles: [null, '/src/pages/_builtin/404/index.tsx', null, null],
