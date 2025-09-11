@@ -3,6 +3,7 @@ const route: any = {
   '(base)_function_product': '商品管理',
   '(base)_function_order': '订单管理',
   '(base)_function_logistics': '物流管理',
+  '(base)_function_inventory': '库存管理',
   '(base)_function': '系统功能',
   '(base)_function_event-bus': '事件总线演示',
   '(base)_function_hide-child': '隐藏子菜单',

@@ -29,6 +29,7 @@ declare module "@soybean-react/vite-plugin-react-router" {
     "document_procomponents": "/document/procomponents";
     "document_antd": "/document/antd";
     "(base)_function": "/function";
+    "(base)_function_inventory": "/function/inventory";
     "(base)_function_logistics": "/function/logistics";
     "(base)_function_order": "/function/order";
     "(base)_function_product": "/function/product";
@@ -102,6 +103,7 @@ declare module "@soybean-react/vite-plugin-react-router" {
   export type LastLevelRouteKey = Extract<
     RouteKey,
     | "(base)_function"
+    | "(base)_function_inventory"
     | "(base)_function_logistics"
     | "(base)_function_order"
     | "(base)_function_product"

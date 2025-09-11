@@ -18,6 +18,7 @@ export const layouts: Record<string, () => Promise<any>> = {
 
 export const pages: Record<string, () => Promise<any>> = {
 "(base)_function": () => import("@/pages/(base)/function/index.tsx"),
+"(base)_function_inventory": () => import("@/pages/(base)/function/inventory/index.tsx"),
 "(base)_function_logistics": () => import("@/pages/(base)/function/logistics/index.tsx"),
 "(base)_function_order": () => import("@/pages/(base)/function/order/index.tsx"),
 "(base)_function_product": () => import("@/pages/(base)/function/product/index.tsx"),

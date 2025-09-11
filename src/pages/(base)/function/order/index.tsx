@@ -1,15 +1,16 @@
+import { Button, Space, Table, Tag } from 'antd';
 import React, { useState } from 'react';
-import { Table, Button, Space, Tag } from 'antd';
+
 import ButtonIcon from '@/components/ButtonIcon';
 import SvgIcon from '@/components/SvgIcon';
 
 interface Order {
+  amount: number;
+  createdAt: string;
+  customer: string;
   id: number;
   orderNo: string;
-  customer: string;
-  amount: number;
-  status: '待支付' | '已支付' | '已发货' | '已完成' | '已取消';
-  createdAt: string;
+  status: '已发货' | '已取消' | '已完成' | '已支付' | '待支付';
 }
 
 const initialOrders: Order[] = [
@@ -26,7 +27,7 @@ const statusColor: Record<Order['status'], string> = {
 };
 
 const OrderManage: React.FC = () => {
-  const [orders] = useState<Order[]>(initialOrders);
+  const [orders, setOrders] = useState<Order[]>(initialOrders);
 
   const columns = [
     { title: '订单号', dataIndex: 'orderNo', key: 'orderNo' },
@@ -54,7 +55,10 @@ const OrderManage: React.FC = () => {
           <SvgIcon icon="ant-design:profile-outlined" className="mr-8px" />
           订单管理
         </h2>
-        <ButtonIcon type="primary" icon="ant-design:plus-circle-outlined">
+        <ButtonIcon
+          icon="ant-design:plus-circle-outlined"
+          type="primary"
+        >
           新建订单
         </ButtonIcon>
       </div>
@@ -77,5 +81,4 @@ export const handle = {
   title: '订单管理'
 };
 
-export default OrderManage; 
-  
+export default OrderManage;
