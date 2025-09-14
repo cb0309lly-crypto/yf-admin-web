@@ -29,12 +29,6 @@ export const generatedRoutes: ElegantConstRoute[] = [
             handle: { i18nKey: 'route.(base)_function', title: '(base)_function' },
             children: [
               {
-                matchedFiles: [null, '/src/pages/(base)/function/inventory/index.tsx', null, null],
-                name: '(base)_function_inventory',
-                path: '/function/inventory',
-                handle: { i18nKey: 'route.(base)_function_inventory', title: '(base)_function_inventory' }
-              },
-              {
                 matchedFiles: [null, '/src/pages/(base)/function/logistics/index.tsx', null, null],
                 name: '(base)_function_logistics',
                 path: '/function/logistics',

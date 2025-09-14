@@ -20,45 +20,5 @@ function convert(m: any) {
  */
 export const BaseChildrenRoutes = [
   {
-    children: [
-      {
-        handle: {
-          i18nKey: 'route.exception_403',
-          icon: 'ic:baseline-block',
-          title: 'exception_403'
-        },
-        id: 'exception_403',
-        lazy: () => import('@/pages/_builtin/403').then(convert),
-        path: '/exception/403'
-      },
-      {
-        handle: {
-          i18nKey: 'route.exception_404',
-          icon: 'ic:baseline-web-asset-off',
-          title: 'exception_404'
-        },
-        id: 'exception_404',
-        lazy: () => import('@/pages/_builtin/404').then(convert),
-        path: '/exception/404'
-      },
-      {
-        handle: {
-          i18nKey: 'route.exception_500',
-          icon: 'ic:baseline-wifi-off',
-          title: 'exception_500'
-        },
-        id: 'exception_500',
-        lazy: () => import('@/pages/_builtin/500').then(convert),
-        path: '/exception/500'
-      }
-    ],
-    handle: {
-      i18nKey: 'route.exception',
-      icon: 'ant-design:exception-outlined',
-      order: 4,
-      title: 'exception'
-    },
-    id: 'exception',
-    path: '/exception'
   },
 ] satisfies RouteObject[];

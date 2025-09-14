@@ -3,6 +3,7 @@ import type { UploadFile } from 'antd/es/upload/interface';
 import React, { useEffect, useRef, useState } from 'react';
 
 import ButtonIcon from '@/components/ButtonIcon';
+import InventoryModal from '@/components/InventoryModal';
 import SvgIcon from '@/components/SvgIcon';
 import {
   createProduct,
@@ -51,6 +52,8 @@ const ProductManage: React.FC = () => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [previewImage, setPreviewImage] = useState<string>('');
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [inventoryModalOpen, setInventoryModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const isEdit = Boolean(editing);
   const lastQuery = useRef({ page: 1, pageSize: PAGE_SIZE });
   const [searchForm] = Form.useForm();
@@ -64,7 +67,8 @@ const ProductManage: React.FC = () => {
       setProducts(data?.list ?? []);
       setPagination({ current: page, pageSize, total: data?.total ?? 0 });
       lastQuery.current = { page, pageSize };
-    } catch (e) {
+    } catch (e: any) {
+      console.error('error', e);
       message.error('获取商品列表失败');
     } finally {
       setLoading(false);
@@ -115,11 +119,9 @@ const ProductManage: React.FC = () => {
   };
 
   // 提交表单
-  const handleOk = async () => {
-    console.log('form--------', form.getFieldsValue());
+  const handleOk = async (values: any) => {
     try {
-      const values = await form.validateFields();
-      const imgUrl = fileList[0]?.url || fileList[0]?.thumbUrl || '';
+      const imgUrl = fileList[0]?.url || fileList[0]?.thumbUrl || undefined;
       const submitData: Partial<Product> = {
         ...values,
         imgUrl
@@ -134,7 +136,9 @@ const ProductManage: React.FC = () => {
       }
       setModalOpen(false);
       loadProducts(pagination.current, pagination.pageSize);
-    } catch {}
+    } catch (error) {
+      console.error('提交失败:', error);
+    }
   };
 
   // 删除商品
@@ -165,7 +169,20 @@ const ProductManage: React.FC = () => {
     setPreviewOpen(true);
   };
 
+  // 打开库存管理弹窗
+  const handleOpenInventoryModal = (product: Product) => {
+    setSelectedProduct(product);
+    setInventoryModalOpen(true);
+  };
+
+  // 关闭库存管理弹窗
+  const handleCloseInventoryModal = () => {
+    setInventoryModalOpen(false);
+    setSelectedProduct(null);
+  };
+
   const columns = [
+    { dataIndex: 'no', key: 'no', title: '编号' },
     {
       dataIndex: 'imgUrl',
       key: 'imgUrl',
@@ -196,6 +213,13 @@ const ProductManage: React.FC = () => {
             onClick={() => openModal(record)}
           >
             编辑
+          </Button>
+          <Button
+            icon={<SvgIcon icon="ant-design:inbox-outlined" />}
+            type="link"
+            onClick={() => handleOpenInventoryModal(record)}
+          >
+            库存管理
           </Button>
           <Popconfirm
             title="确定删除该商品吗？"
@@ -357,44 +381,53 @@ const ProductManage: React.FC = () => {
             name="name"
             rules={[{ message: '请输入商品名', required: true }]}
           >
-            {' '}
-            <Input />{' '}
+            <Input placeholder="请输入商品名" />
           </Form.Item>
           <Form.Item
             label="价格"
             name="price"
             rules={[{ message: '请输入价格', required: true }]}
           >
-            {' '}
             <InputNumber
               className="w-full"
               min={0}
-            />{' '}
+              placeholder="请输入价格"
+            />
           </Form.Item>
           <Form.Item
             label="单位"
             name="unit"
           >
-            {' '}
-            <Input />{' '}
+            <Input placeholder="请输入单位" />
           </Form.Item>
           <Form.Item
             label="标签"
             name="tag"
           >
-            {' '}
-            <Input />{' '}
+            <Input placeholder="请输入标签" />
           </Form.Item>
           <Form.Item
             label="状态"
             name="status"
           >
-            {' '}
-            <Input />{' '}
+            <Select placeholder="请选择状态">
+              <Select.Option value="已上架">已上架</Select.Option>
+              <Select.Option value="已下架">已下架</Select.Option>
+              <Select.Option value="缺货">缺货</Select.Option>
+              <Select.Option value="有货">有货</Select.Option>
+              <Select.Option value="售罄">售罄</Select.Option>
+            </Select>
           </Form.Item>
           <Form.Item ><Button htmlType="submit" type="primary">保存</Button></Form.Item>
         </Form>
       </Modal>
+
+      {/* 库存管理弹窗 */}
+      <InventoryModal
+        open={inventoryModalOpen}
+        onClose={handleCloseInventoryModal}
+        product={selectedProduct}
+      />
     </div>
   );
 };

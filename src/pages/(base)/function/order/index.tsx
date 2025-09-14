@@ -1,75 +1,436 @@
-import { Button, Space, Table, Tag } from 'antd';
-import React, { useState } from 'react';
+import { Button, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag, message } from 'antd';
+import React, { useEffect, useRef, useState } from 'react';
 
 import ButtonIcon from '@/components/ButtonIcon';
 import SvgIcon from '@/components/SvgIcon';
+import {
+  createOrder,
+  deleteOrder,
+  fetchOrderDetail,
+  fetchOrderList,
+  updateOrder,
+  updateOrderStatus
+} from '@/service/api/order';
+import type { Order, OrderQueryParams, OrderStatus } from '@/types/order';
 
-interface Order {
-  amount: number;
-  createdAt: string;
-  customer: string;
-  id: number;
-  orderNo: string;
-  status: '已发货' | '已取消' | '已完成' | '已支付' | '待支付';
-}
+const PAGE_SIZE = 8;
 
-const initialOrders: Order[] = [
-  { id: 1, orderNo: '20240601001', customer: '张三', amount: 199, status: '待支付', createdAt: '2024-06-01 10:00' },
-  { id: 2, orderNo: '20240601002', customer: '李四', amount: 299, status: '已支付', createdAt: '2024-06-01 11:00' }
+// 订单状态选项
+const ORDER_STATUS_OPTIONS = [
+  { label: '全部', value: '' },
+  { label: '已下单', value: '已下单' },
+  { label: '未付款', value: '未付款' },
+  { label: '已付款', value: '已付款' },
+  { label: '已取消', value: '已取消' },
+  { label: '已配送', value: '已配送' },
+  { label: '异常单', value: '异常单' }
 ];
 
-const statusColor: Record<Order['status'], string> = {
-  '待支付': 'orange',
-  '已支付': 'blue',
-  '已发货': 'purple',
-  '已完成': 'green',
-  '已取消': 'red'
+const statusColor: Record<OrderStatus, string> = {
+  '已下单': 'blue',
+  '未付款': 'orange',
+  '已付款': 'green',
+  '已取消': 'red',
+  '已配送': 'purple',
+  '异常单': 'gray'
 };
 
 const OrderManage: React.FC = () => {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [pagination, setPagination] = useState({ current: 1, pageSize: PAGE_SIZE, total: 0 });
+  const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<Order | null>(null);
+  const [form] = Form.useForm();
+  const isEdit = Boolean(editing);
+  const lastQuery = useRef({ page: 1, pageSize: PAGE_SIZE });
+  const [searchForm] = Form.useForm();
+  const [searchParams, setSearchParams] = useState<OrderQueryParams>({
+    page: 1,
+    pageSize: PAGE_SIZE,
+    keyword: '',
+    userNo: '',
+    orderStatus: '',
+    operatorNo: '',
+    customerNo: ''
+  });
+
+  // 获取订单列表
+  const loadOrders = async (page = 1, pageSize = PAGE_SIZE, params = searchParams) => {
+    setLoading(true);
+    try {
+      const { data } = await fetchOrderList({ ...params });
+      setOrders(data?.list ?? []);
+      setPagination({ current: page, pageSize, total: data?.total ?? 0 });
+      lastQuery.current = { page, pageSize };
+    } catch (e: any) {
+      console.error('error', e);
+      message.error('获取订单列表失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOrders();
+    // eslint-disable-next-line
+  }, []);
+
+  // 查询表单提交
+  const handleSearch = () => {
+    const values = searchForm.getFieldsValue();
+    setSearchParams(values);
+    loadOrders(1, PAGE_SIZE, values);
+  };
+
+  // 打开新增/编辑弹窗
+  const openModal = async (order?: Order) => {
+    setEditing(order || null);
+    setModalOpen(true);
+    if (order) {
+      // 获取详情
+      const { data: detail } = await fetchOrderDetail(order.no);
+      if (detail) {
+        form.setFieldsValue({ ...detail });
+      } else {
+        form.resetFields();
+      }
+    } else {
+      form.resetFields();
+    }
+  };
+
+  // 提交表单
+  const handleOk = async (values: any) => {
+    try {
+      const submitData: Partial<Order> = {
+        ...values
+      };
+      if (isEdit && editing) {
+        submitData.no = editing.no;
+        await updateOrder(submitData);
+        message.success('订单编辑成功');
+      } else {
+        await createOrder(submitData);
+        message.success('订单添加成功');
+      }
+      setModalOpen(false);
+      loadOrders(pagination.current, pagination.pageSize);
+    } catch (error) {
+      console.error('提交失败:', error);
+    }
+  };
+
+  // 删除订单
+  const handleDelete = async (id: string) => {
+    await deleteOrder(id);
+    message.success('订单已删除');
+    loadOrders(pagination.current, pagination.pageSize);
+  };
+
+  // 更新订单状态
+  const handleStatusChange = async (orderNo: string, newStatus: OrderStatus) => {
+    try {
+      await updateOrderStatus(orderNo, newStatus);
+      message.success('订单状态更新成功');
+      loadOrders(pagination.current, pagination.pageSize);
+    } catch (error) {
+      console.error('状态更新失败:', error);
+    }
+  };
 
   const columns = [
-    { title: '订单号', dataIndex: 'orderNo', key: 'orderNo' },
-    { title: '客户', dataIndex: 'customer', key: 'customer' },
-    { title: '金额', dataIndex: 'amount', key: 'amount', render: (v: number) => `￥${v}` },
-    { title: '状态', dataIndex: 'status', key: 'status', render: (v: Order['status']) => <Tag color={statusColor[v]}>{v}</Tag> },
-    { title: '下单时间', dataIndex: 'createdAt', key: 'createdAt' },
+    { dataIndex: 'no', key: 'no', title: '订单编号' },
+    { dataIndex: 'userNo', key: 'userNo', title: '用户编号' },
+    { dataIndex: 'shipAddress', key: 'shipAddress', title: '收货地址' },
     {
-      title: '操作',
+      dataIndex: 'orderTotal',
+      key: 'orderTotal',
+      title: '订单总额',
+      render: (v: number) => v ? `¥${v.toFixed(2)}` : '-'
+    },
+    {
+      dataIndex: 'orderStatus',
+      key: 'orderStatus',
+      title: '订单状态',
+      render: (status: OrderStatus) => (
+        <Tag color={statusColor[status]}>{status}</Tag>
+      )
+    },
+    { dataIndex: 'description', key: 'description', title: '订单描述' },
+    { dataIndex: 'remark', key: 'remark', title: '备注' },
+    { dataIndex: 'operatorNo', key: 'operatorNo', title: '操作员编号' },
+    { dataIndex: 'customerNo', key: 'customerNo', title: '客户编号' },
+    { dataIndex: 'productNo', key: 'productNo', title: '商品编号' },
+    { dataIndex: 'materialNo', key: 'materialNo', title: '物料编号' },
+    { dataIndex: 'logisticsNo', key: 'logisticsNo', title: '物流编号' },
+    { dataIndex: 'createdAt', key: 'createdAt', title: '创建时间' },
+    {
       key: 'action',
       render: (_: any, record: Order) => (
         <Space>
-          <Button type="link" icon={<SvgIcon icon="ant-design:eye-outlined" />}>查看</Button>
-          <Button type="link" icon={<SvgIcon icon="ant-design:edit-outlined" />}>编辑</Button>
-          <Button type="link" danger icon={<SvgIcon icon="ant-design:delete-outlined" />}>删除</Button>
+          <Button
+            icon={<SvgIcon icon="ant-design:eye-outlined" />}
+            type="link"
+            onClick={() => openModal(record)}
+          >
+            查看
+          </Button>
+          <Button
+            icon={<SvgIcon icon="ant-design:edit-outlined" />}
+            type="link"
+            onClick={() => openModal(record)}
+          >
+            编辑
+          </Button>
+          <Select
+            size="small"
+            style={{ width: 100 }}
+            value={record.orderStatus}
+            onChange={(value) => handleStatusChange(record.no, value)}
+            options={ORDER_STATUS_OPTIONS.filter(opt => opt.value !== '')}
+          />
+          <Popconfirm
+            title="确定删除该订单吗？"
+            onConfirm={() => handleDelete(record.no)}
+          >
+            <Button
+              danger
+              icon={<SvgIcon icon="ant-design:delete-outlined" />}
+              type="link"
+            >
+              删除
+            </Button>
+          </Popconfirm>
         </Space>
-      )
+      ),
+      title: '操作'
     }
   ];
 
   return (
     <div className="p-16px">
-      <div className="flex-y-center justify-between mb-16px">
-        <h2 className="text-20px font-bold flex-y-center">
-          <SvgIcon icon="ant-design:profile-outlined" className="mr-8px" />
+      <div className="mb-16px flex-y-center justify-between">
+        <h2 className="flex-y-center text-20px font-bold">
+          <SvgIcon
+            className="mr-8px"
+            icon="ant-design:profile-outlined"
+          />
           订单管理
         </h2>
         <ButtonIcon
           icon="ant-design:plus-circle-outlined"
           type="primary"
+          onClick={() => openModal()}
         >
-          新建订单
+          添加订单
         </ButtonIcon>
       </div>
-      <div className="bg-white rd-8px p-16px shadow-sm">
+      {/* 查询表单 */}
+      <Form
+        className="mb-16px"
+        form={searchForm}
+        initialValues={searchParams}
+        layout="inline"
+        onFinish={handleSearch}
+      >
+        <Form.Item
+          label="关键词"
+          name="keyword"
+        >
+          <Input
+            allowClear
+            placeholder="请输入订单编号、收货地址等关键词"
+            style={{ width: 200 }}
+          />
+        </Form.Item>
+        <Form.Item
+          label="用户编号"
+          name="userNo"
+        >
+          <Input
+            allowClear
+            placeholder="请输入用户编号"
+            style={{ width: 150 }}
+          />
+        </Form.Item>
+        <Form.Item
+          label="订单状态"
+          name="orderStatus"
+        >
+          <Select
+            allowClear
+            options={ORDER_STATUS_OPTIONS}
+            style={{ width: 120 }}
+          />
+        </Form.Item>
+        <Form.Item
+          label="操作员编号"
+          name="operatorNo"
+        >
+          <Input
+            allowClear
+            placeholder="请输入操作员编号"
+            style={{ width: 150 }}
+          />
+        </Form.Item>
+        <Form.Item
+          label="客户编号"
+          name="customerNo"
+        >
+          <Input
+            allowClear
+            placeholder="请输入客户编号"
+            style={{ width: 150 }}
+          />
+        </Form.Item>
+        <Form.Item>
+          <Button
+            htmlType="submit"
+            type="primary"
+          >
+            查询
+          </Button>
+        </Form.Item>
+        <Form.Item>
+          <Button
+            htmlType="button"
+            onClick={() => {
+              searchForm.resetFields();
+              setSearchParams({
+                page: 1,
+                pageSize: PAGE_SIZE,
+                keyword: '',
+                userNo: '',
+                orderStatus: '',
+                operatorNo: '',
+                customerNo: ''
+              });
+              loadOrders(1, PAGE_SIZE, {
+                page: 1,
+                pageSize: PAGE_SIZE,
+                keyword: '',
+                userNo: '',
+                orderStatus: '',
+                operatorNo: '',
+                customerNo: ''
+              });
+            }}
+          >
+            重置
+          </Button>
+        </Form.Item>
+      </Form>
+      {/* 表格区域 */}
+      <div className="rd-8px bg-white p-16px shadow-sm">
         <Table
-          rowKey="id"
           columns={columns}
           dataSource={orders}
-          pagination={{ pageSize: 8 }}
+          loading={loading}
+          rowKey="no"
+          pagination={{
+            current: pagination.current,
+            onChange: (page, pageSize) => loadOrders(page, pageSize, searchParams),
+            pageSize: pagination.pageSize,
+            showTotal: total => `共${total}条`,
+            total: pagination.total
+          }}
         />
       </div>
+      <Modal
+        destroyOnClose
+        closable
+        footer={null}
+        open={modalOpen}
+        title={isEdit ? '编辑订单' : '添加订单'}
+        onCancel={() => setModalOpen(false)}
+        width={800}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleOk}
+        >
+          <div className="grid grid-cols-2 gap-4">
+            <Form.Item
+              label="用户编号"
+              name="userNo"
+              rules={[{ message: '请输入用户编号', required: true }]}
+            >
+              <Input placeholder="请输入用户编号" />
+            </Form.Item>
+            <Form.Item
+              label="订单状态"
+              name="orderStatus"
+            >
+              <Select placeholder="请选择订单状态">
+                {ORDER_STATUS_OPTIONS.filter(opt => opt.value !== '').map(opt => (
+                  <Select.Option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              label="订单总额"
+              name="orderTotal"
+            >
+              <Input placeholder="请输入订单总额" type="number" />
+            </Form.Item>
+            <Form.Item
+              label="操作员编号"
+              name="operatorNo"
+            >
+              <Input placeholder="请输入操作员编号" />
+            </Form.Item>
+            <Form.Item
+              label="客户编号"
+              name="customerNo"
+            >
+              <Input placeholder="请输入客户编号" />
+            </Form.Item>
+            <Form.Item
+              label="商品编号"
+              name="productNo"
+            >
+              <Input placeholder="请输入商品编号" />
+            </Form.Item>
+            <Form.Item
+              label="物料编号"
+              name="materialNo"
+            >
+              <Input placeholder="请输入物料编号" />
+            </Form.Item>
+            <Form.Item
+              label="物流编号"
+              name="logisticsNo"
+            >
+              <Input placeholder="请输入物流编号" />
+            </Form.Item>
+          </div>
+          <Form.Item
+            label="收货地址"
+            name="shipAddress"
+          >
+            <Input.TextArea placeholder="请输入收货地址" rows={2} />
+          </Form.Item>
+          <Form.Item
+            label="订单描述"
+            name="description"
+          >
+            <Input.TextArea placeholder="请输入订单描述" rows={2} />
+          </Form.Item>
+          <Form.Item
+            label="备注"
+            name="remark"
+          >
+            <Input.TextArea placeholder="请输入备注" rows={2} />
+          </Form.Item>
+          <Form.Item>
+            <Button htmlType="submit" type="primary">保存</Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
