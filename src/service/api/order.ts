@@ -12,16 +12,6 @@ export const fetchOrderList = (params: OrderQueryParams) =>
     params,
   });
 
-/**
- * 新增订单
- * @param data 订单数据
- */
-export const createOrder = (data: Partial<Order>) =>
-  request<Order>({
-    url: '/order',
-    method: 'POST',
-    data,
-  });
 
 /**
  * 编辑订单
@@ -64,4 +54,15 @@ export const updateOrderStatus = (id: string, orderStatus: string) =>
     url: `/order`,
     method: 'PUT',
     data: { no: id, orderStatus },
+  });
+
+/**
+ * 创建订单
+ * @param data 订单数据
+ */
+export const createOrder = (data: Partial<Order>) =>
+  request<Order>({
+    url: '/order',
+    method: 'POST',
+    data,
   });

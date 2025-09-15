@@ -3,8 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import ButtonIcon from '@/components/ButtonIcon';
 import SvgIcon from '@/components/SvgIcon';
+import OrderCreateModal from '@/components/OrderCreateModal';
 import {
-  createOrder,
   deleteOrder,
   fetchOrderDetail,
   fetchOrderList,
@@ -59,9 +59,15 @@ const OrderManage: React.FC = () => {
   const loadOrders = async (page = 1, pageSize = PAGE_SIZE, params = searchParams) => {
     setLoading(true);
     try {
-      const { data } = await fetchOrderList({ ...params });
-      setOrders(data?.list ?? []);
-      setPagination({ current: page, pageSize, total: data?.total ?? 0 });
+      const response = await fetchOrderList({ ...params, page, pageSize });
+      // 根据后端响应格式调整
+      const data = response?.data || response;
+      setOrders(data?.list ?? data?.records ?? []);
+      setPagination({
+        current: page,
+        pageSize,
+        total: data?.total ?? data?.totalCount ?? 0
+      });
       lastQuery.current = { page, pageSize };
     } catch (e: any) {
       console.error('error', e);
@@ -76,6 +82,7 @@ const OrderManage: React.FC = () => {
     // eslint-disable-next-line
   }, []);
 
+
   // 查询表单提交
   const handleSearch = () => {
     const values = searchForm.getFieldsValue();
@@ -87,6 +94,7 @@ const OrderManage: React.FC = () => {
   const openModal = async (order?: Order) => {
     setEditing(order || null);
     setModalOpen(true);
+
     if (order) {
       // 获取详情
       const { data: detail } = await fetchOrderDetail(order.no);
@@ -137,6 +145,11 @@ const OrderManage: React.FC = () => {
     } catch (error) {
       console.error('状态更新失败:', error);
     }
+  };
+
+  // 订单创建成功
+  const handleOrderCreateSuccess = () => {
+    loadOrders(pagination.current, pagination.pageSize);
   };
 
   const columns = [
@@ -221,7 +234,7 @@ const OrderManage: React.FC = () => {
         <ButtonIcon
           icon="ant-design:plus-circle-outlined"
           type="primary"
-          onClick={() => openModal()}
+          onClick={() => setModalOpen(true)}
         >
           添加订单
         </ButtonIcon>
@@ -337,100 +350,106 @@ const OrderManage: React.FC = () => {
           }}
         />
       </div>
-      <Modal
-        destroyOnClose
-        closable
-        footer={null}
+      {/* 订单创建弹窗 */}
+      <OrderCreateModal
         open={modalOpen}
-        title={isEdit ? '编辑订单' : '添加订单'}
         onCancel={() => setModalOpen(false)}
-        width={800}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleOk}
+        onSuccess={handleOrderCreateSuccess}
+      />
+      
+      {/* 订单编辑弹窗 */}
+      {editing && (
+        <Modal
+          destroyOnClose
+          closable
+          footer={null}
+          open={!!editing}
+          title="编辑订单"
+          onCancel={() => setEditing(null)}
+          width={800}
         >
-          <div className="grid grid-cols-2 gap-4">
-            <Form.Item
-              label="用户编号"
-              name="userNo"
-              rules={[{ message: '请输入用户编号', required: true }]}
-            >
-              <Input placeholder="请输入用户编号" />
-            </Form.Item>
-            <Form.Item
-              label="订单状态"
-              name="orderStatus"
-            >
-              <Select placeholder="请选择订单状态">
-                {ORDER_STATUS_OPTIONS.filter(opt => opt.value !== '').map(opt => (
-                  <Select.Option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item
-              label="订单总额"
-              name="orderTotal"
-            >
-              <Input placeholder="请输入订单总额" type="number" />
-            </Form.Item>
-            <Form.Item
-              label="操作员编号"
-              name="operatorNo"
-            >
-              <Input placeholder="请输入操作员编号" />
-            </Form.Item>
-            <Form.Item
-              label="客户编号"
-              name="customerNo"
-            >
-              <Input placeholder="请输入客户编号" />
-            </Form.Item>
-            <Form.Item
-              label="商品编号"
-              name="productNo"
-            >
-              <Input placeholder="请输入商品编号" />
-            </Form.Item>
-            <Form.Item
-              label="物料编号"
-              name="materialNo"
-            >
-              <Input placeholder="请输入物料编号" />
-            </Form.Item>
-            <Form.Item
-              label="物流编号"
-              name="logisticsNo"
-            >
-              <Input placeholder="请输入物流编号" />
-            </Form.Item>
-          </div>
-          <Form.Item
-            label="收货地址"
-            name="shipAddress"
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleOk}
           >
-            <Input.TextArea placeholder="请输入收货地址" rows={2} />
-          </Form.Item>
-          <Form.Item
-            label="订单描述"
-            name="description"
-          >
-            <Input.TextArea placeholder="请输入订单描述" rows={2} />
-          </Form.Item>
-          <Form.Item
-            label="备注"
-            name="remark"
-          >
-            <Input.TextArea placeholder="请输入备注" rows={2} />
-          </Form.Item>
-          <Form.Item>
-            <Button htmlType="submit" type="primary">保存</Button>
-          </Form.Item>
-        </Form>
-      </Modal>
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item
+                label="订单状态"
+                name="orderStatus"
+              >
+                <Select placeholder="请选择订单状态">
+                  {ORDER_STATUS_OPTIONS.filter(opt => opt.value !== '').map(opt => (
+                    <Select.Option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="订单总额"
+                name="orderTotal"
+                rules={[
+                  { type: 'number', min: 0, message: '订单总额不能小于0' }
+                ]}
+              >
+                <Input placeholder="请输入订单总额" type="number" step="0.01" />
+              </Form.Item>
+              <Form.Item
+                label="操作员编号"
+                name="operatorNo"
+              >
+                <Input placeholder="请输入操作员编号" />
+              </Form.Item>
+              <Form.Item
+                label="客户编号"
+                name="customerNo"
+              >
+                <Input placeholder="请输入客户编号" />
+              </Form.Item>
+              <Form.Item
+                label="商品编号"
+                name="productNo"
+              >
+                <Input placeholder="请输入商品编号" />
+              </Form.Item>
+              <Form.Item
+                label="物料编号"
+                name="materialNo"
+              >
+                <Input placeholder="请输入物料编号" />
+              </Form.Item>
+              <Form.Item
+                label="物流编号"
+                name="logisticsNo"
+              >
+                <Input placeholder="请输入物流编号" />
+              </Form.Item>
+            </div>
+            <Form.Item
+              label="收货地址"
+              name="shipAddress"
+            >
+              <Input.TextArea placeholder="请输入收货地址" rows={2} />
+            </Form.Item>
+            <Form.Item
+              label="订单描述"
+              name="description"
+            >
+              <Input.TextArea placeholder="请输入订单描述" rows={2} />
+            </Form.Item>
+            <Form.Item
+              label="备注"
+              name="remark"
+            >
+              <Input.TextArea placeholder="请输入备注" rows={2} />
+            </Form.Item>
+            <Form.Item>
+              <Button htmlType="submit" type="primary">保存</Button>
+            </Form.Item>
+          </Form>
+        </Modal>
+      )}
     </div>
   );
 };

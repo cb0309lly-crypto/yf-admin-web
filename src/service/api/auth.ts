@@ -46,3 +46,28 @@ export function fetchRefreshToken(refreshToken: string) {
 export function fetchCustomBackendError(code: string, msg: string) {
   return request({ params: { code, msg }, url: '/auth/error' });
 }
+
+/**
+ * 获取用户列表
+ * @param params 查询参数
+ */
+export function fetchUserList(params: {
+  page: number;
+  pageSize: number;
+  keyword?: string;
+}) {
+  return request<{
+    list: Array<{
+      no: string;
+      nickname: string;
+      phone: string;
+      avatar?: string;
+      authLogin?: string;
+    }>;
+    total: number;
+  }>({
+    url: '/auth/list',
+    method: 'GET',
+    params,
+  });
+}

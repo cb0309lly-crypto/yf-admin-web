@@ -68,6 +68,7 @@ declare global {
   const IconMdiKeyboardReturn: typeof import('~icons/mdi/keyboard-return.tsx')['default']
   const IconMdiRefresh: typeof import('~icons/mdi/refresh.tsx')['default']
   const IconUilSearch: typeof import('~icons/uil/search.tsx')['default']
+  const InventoryModal: typeof import('../components/InventoryModal')['default']
   const Link: typeof import('react-router-dom')['Link']
   const LookForward: typeof import('../components/LookForward')['default']
   const NavLink: typeof import('react-router-dom')['NavLink']
@@ -152,6 +153,7 @@ declare global {
   const useNavigate: typeof import('react-router-dom')['useNavigate']
   const useNavigationType: typeof import('react-router-dom')['useNavigationType']
   const useNetwork: typeof import('ahooks')['useNetwork']
+  const useOSS: typeof import('../hooks/useOSS')['useOSS']
   const useOutlet: typeof import('react-router-dom')['useOutlet']
   const useOutletContext: typeof import('react-router-dom')['useOutletContext']
   const usePagination: typeof import('ahooks')['usePagination']
@@ -211,4 +213,7 @@ declare global {
   // @ts-ignore
   export type { ECOption } from '../hooks/common/echarts'
   import('../hooks/common/echarts')
+  // @ts-ignore
+  export type { UseOSSOptions } from '../hooks/useOSS'
+  import('../hooks/useOSS')
 }
