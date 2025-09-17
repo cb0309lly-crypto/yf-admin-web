@@ -1,21 +1,21 @@
-import { AutoComplete, Button, Card, Form, Input, InputNumber, Modal, Table, message, Space, Tag, Divider } from 'antd';
-import React, { useEffect, useState } from 'react';
-import { MinusOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { AutoComplete, Button, Card, Divider, Form, Input, Modal, Space, Table, message } from 'antd';
+import React, { useState } from 'react';
 
 import { fetchUserList } from '@/service/api/auth';
-import { fetchProductList } from '@/service/api/product';
 import { addToCart, fetchUserCart, removeFromCart, updateCartQuantity } from '@/service/api/cart';
 import { createOrder } from '@/service/api/order';
 import { createBatchOrderItems } from '@/service/api/order-item';
-import { parseNumber, formatPrice } from '@/utils/number';
-import type { Cart, CartItemStatus } from '@/types/cart';
+import { fetchProductList } from '@/service/api/product';
+import type { Cart } from '@/types/cart';
 import type { Order, OrderStatus } from '@/types/order';
 import type { Product } from '@/types/product';
+import { formatPrice, parseNumber } from '@/utils/number';
 
 interface OrderCreateModalProps {
-  open: boolean;
   onCancel: () => void;
   onSuccess: () => void;
+  open: boolean;
 }
 
 interface CartItem extends Cart {
@@ -27,9 +27,17 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
   const [step, setStep] = useState(1); // 1: 选择用户, 2: 选择商品, 3: 确认订单
 
   // 用户选择相关状态
-  const [users, setUsers] = useState<Array<{ no: string; nickname: string; phone: string; avatar?: string; authLogin?: string }>>([]);
+  const [users, setUsers] = useState<
+    Array<{ authLogin?: string; avatar?: string; nickname: string; no: string; phone: string }>
+  >([]);
   const [userLoading, setUserLoading] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<{ no: string; nickname: string; phone: string; avatar?: string; authLogin?: string } | null>(null);
+  const [selectedUser, setSelectedUser] = useState<{
+    authLogin?: string;
+    avatar?: string;
+    nickname: string;
+    no: string;
+    phone: string;
+  } | null>(null);
 
   // 商品选择相关状态
   const [products, setProducts] = useState<Product[]>([]);
@@ -114,7 +122,29 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
     }
   };
 
-  // 添加商品到购物车
+
+
+  // 加载用户购物车
+  const loadUserCart = async () => {
+    if (!selectedUser) return;
+
+    setCartLoading(true);
+    try {
+      const response = await fetchUserCart(selectedUser.no);
+      const data = response?.data || response;
+
+      // 使用后端返回的数据结构
+      setCartItems(('items' in data && data?.items) || []);
+      setOrderTotal(('totalPrice' in data && data?.totalPrice) || 0);
+    } catch (error) {
+      console.error('加载购物车失败:', error);
+      message.error('加载购物车失败');
+    } finally {
+      setCartLoading(false);
+    }
+  };
+
+// 添加商品到购物车
   const handleAddToCart = async (product: Product, quantity: number = 1) => {
     if (!selectedUser) {
       message.error('请先选择用户');
@@ -129,51 +159,10 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
       });
 
       message.success('商品已添加到购物车');
-      loadUserCart();
+      await loadUserCart();
     } catch (error) {
       console.error('添加商品失败:', error);
       message.error('添加商品失败');
-    }
-  };
-
-  // 加载用户购物车
-  const loadUserCart = async () => {
-    if (!selectedUser) return;
-
-    setCartLoading(true);
-    try {
-      const response = await fetchUserCart(selectedUser.no);
-      const data = response?.data || response;
-
-      // 使用后端返回的数据结构
-      setCartItems(data?.items || []);
-      setOrderTotal(data?.totalPrice || 0);
-    } catch (error) {
-      console.error('加载购物车失败:', error);
-      message.error('加载购物车失败');
-    } finally {
-      setCartLoading(false);
-    }
-  };
-
-  // 更新商品数量
-  const handleUpdateQuantity = async (cartItem: CartItem, quantity: number) => {
-    if (quantity <= 0) {
-      handleRemoveFromCart(cartItem);
-      return;
-    }
-
-    try {
-      await updateCartQuantity({
-        id: cartItem.no,
-        quantity
-      });
-
-      message.success('数量已更新');
-      loadUserCart();
-    } catch (error) {
-      console.error('更新数量失败:', error);
-      message.error('更新数量失败');
     }
   };
 
@@ -188,10 +177,31 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
       });
 
       message.success('商品已从购物车移除');
-      loadUserCart();
+      await loadUserCart();
     } catch (error) {
       console.error('移除商品失败:', error);
       message.error('移除商品失败');
+    }
+  };
+
+  // 更新商品数量
+  const handleUpdateQuantity = async (cartItem: CartItem, quantity: number) => {
+    if (quantity <= 0) {
+      await handleRemoveFromCart(cartItem);
+      return;
+    }
+
+    try {
+      await updateCartQuantity({
+        id: cartItem.no,
+        quantity
+      });
+
+      message.success('数量已更新');
+      await loadUserCart();
+    } catch (error) {
+      console.error('更新数量失败:', error);
+      message.error('更新数量失败');
     }
   };
 
@@ -228,15 +238,15 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
     try {
       // 创建订单
       const orderData: Partial<Order> = {
-        userNo: selectedUser.no,
-        shipAddress: values.shipAddress,
-        orderTotal: orderTotal,
-        orderStatus: '已下单' as OrderStatus,
-        description: values.description,
-        remark: values.remark,
-        operatorNo: values.operatorNo,
         customerNo: values.customerNo,
-        logisticsNo: values.logisticsNo
+        description: values.description,
+        logisticsNo: values.logisticsNo,
+        operatorNo: values.operatorNo,
+        orderStatus: '已下单' as OrderStatus,
+        orderTotal,
+        remark: values.remark,
+        shipAddress: values.shipAddress,
+        userNo: selectedUser.no
       };
 
       const orderResponse = await createOrder(orderData);
@@ -244,21 +254,21 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
 
       // 创建订单项
       const orderItems = cartItems.map(item => ({
-        orderNo: order?.no,
-        productNo: item.productNo,
-        quantity: item.quantity,
-        unitPrice: parseNumber(item.unitPrice),
-        totalPrice: parseNumber(item.totalPrice),
         discountAmount: 0,
         finalPrice: parseNumber(item.totalPrice),
+        orderNo: 'no' in order ? order?.no : '',
+        productNo: item.productNo,
+        productSnapshot: item.product,
+        quantity: item.quantity,
         status: 'pending' as any,
-        productSnapshot: item.product
+        totalPrice: parseNumber(item.totalPrice),
+        unitPrice: parseNumber(item.unitPrice)
       }));
 
       // 批量创建订单项
       const batchResult = await createBatchOrderItems({ orderItems });
       console.log('批量创建订单项结果:', batchResult);
-      
+
       if (!batchResult?.data?.success) {
         throw new Error('创建订单项失败');
       }
