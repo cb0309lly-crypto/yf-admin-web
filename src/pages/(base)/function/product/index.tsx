@@ -333,8 +333,8 @@ const ProductManage: React.FC = () => {
         />
       </div>
       <Modal
-        destroyOnClose
         closable
+        destroyOnClose
         footer={null}
         open={modalOpen}
         title={isEdit ? '编辑商品' : '添加商品'}
@@ -418,15 +418,22 @@ const ProductManage: React.FC = () => {
               <Select.Option value="售罄">售罄</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item ><Button htmlType="submit" type="primary">保存</Button></Form.Item>
+          <Form.Item>
+            <Button
+              htmlType="submit"
+              type="primary"
+            >
+              保存
+            </Button>
+          </Form.Item>
         </Form>
       </Modal>
 
       {/* 库存管理弹窗 */}
       <InventoryModal
         open={inventoryModalOpen}
-        onClose={handleCloseInventoryModal}
         product={selectedProduct}
+        onClose={handleCloseInventoryModal}
       />
     </div>
   );

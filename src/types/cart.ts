@@ -25,8 +25,8 @@ export interface Cart {
 
 export enum CartItemStatus {
   ACTIVE = 'active',
-  REMOVED = 'removed',
-  PURCHASED = 'purchased'
+  PURCHASED = 'purchased',
+  REMOVED = 'removed'
 }
 
 export interface CartListResponse {
@@ -35,7 +35,7 @@ export interface CartListResponse {
 }
 
 export interface UserCartResponse {
+  itemCount: number;
   items: Cart[];
   totalPrice: number;
-  itemCount: number;
 }

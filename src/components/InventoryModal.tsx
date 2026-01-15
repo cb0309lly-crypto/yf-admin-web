@@ -2,11 +2,7 @@ import { Button, Card, Form, Input, InputNumber, Modal, Select, Table, Tabs, mes
 import React, { useEffect, useState } from 'react';
 
 import SvgIcon from '@/components/SvgIcon';
-import {
-  fetchInventoryByProduct,
-  saveInventory,
-  updateInventory
-} from '@/service/api';
+import { fetchInventoryByProduct, saveInventory, updateInventory } from '@/service/api';
 import type { Inventory } from '@/types/inventory';
 import type { Product } from '@/types/product';
 
@@ -16,7 +12,7 @@ interface InventoryModalProps {
   product: Product | null;
 }
 
-const InventoryModal: React.FC<InventoryModalProps> = ({ open, onClose, product }) => {
+const InventoryModal: React.FC<InventoryModalProps> = ({ onClose, open, product }) => {
   const [inventory, setInventory] = useState<Inventory | null>(null);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
@@ -71,33 +67,42 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ open, onClose, product 
     }
   };
 
-
   const tabItems = [
     {
-      key: 'settings',
-      label: '库存设置',
       children: (
-        <Form form={form} layout="vertical">
+        <Form
+          form={form}
+          layout="vertical"
+        >
           <Form.Item
             label="当前库存"
             name="quantity"
-            rules={[{ required: true, message: '请输入当前库存' }]}
+            rules={[{ message: '请输入当前库存', required: true }]}
           >
-            <InputNumber min={0} style={{ width: '100%' }} />
+            <InputNumber
+              min={0}
+              style={{ width: '100%' }}
+            />
           </Form.Item>
           <Form.Item
             label="最小库存预警"
             name="minStock"
-            rules={[{ required: true, message: '请输入最小库存预警' }]}
+            rules={[{ message: '请输入最小库存预警', required: true }]}
           >
-            <InputNumber min={0} style={{ width: '100%' }} />
+            <InputNumber
+              min={0}
+              style={{ width: '100%' }}
+            />
           </Form.Item>
           <Form.Item
             label="最大库存限制"
             name="maxStock"
-            rules={[{ required: true, message: '请输入最大库存限制' }]}
+            rules={[{ message: '请输入最大库存限制', required: true }]}
           >
-            <InputNumber min={0} style={{ width: '100%' }} />
+            <InputNumber
+              min={0}
+              style={{ width: '100%' }}
+            />
           </Form.Item>
           <Form.Item
             label="库存位置"
@@ -109,16 +114,37 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ open, onClose, product 
             label="备注"
             name="remark"
           >
-            <Input.TextArea rows={3} placeholder="请输入备注" />
+            <Input.TextArea
+              placeholder="请输入备注"
+              rows={3}
+            />
           </Form.Item>
         </Form>
-      )
-    },
-
+      ),
+      key: 'settings',
+      label: '库存设置'
+    }
   ];
 
   return (
     <Modal
+      open={open}
+      width={800}
+      footer={[
+        <Button
+          key="cancel"
+          onClick={onClose}
+        >
+          关闭
+        </Button>,
+        <Button
+          key="save"
+          type="primary"
+          onClick={handleSaveInventory}
+        >
+          保存设置
+        </Button>
+      ]}
       title={
         <div className="flex-y-center">
           <SvgIcon
@@ -128,17 +154,7 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ open, onClose, product 
           库存管理 - {product?.name}
         </div>
       }
-      open={open}
       onCancel={onClose}
-      width={800}
-      footer={[
-        <Button key="cancel" onClick={onClose}>
-          关闭
-        </Button>,
-        <Button key="save" type="primary" onClick={handleSaveInventory}>
-          保存设置
-        </Button>
-      ]}
     >
       <div className="mb-16px">
         <div className="flex-y-center">
@@ -152,7 +168,9 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ open, onClose, product 
           <div>
             <div className="text-16px font-bold">{product?.name}</div>
             <div className="text-14px text-#666">商品编号: {product?.no}</div>
-            <div className="text-14px text-#666">当前库存: {inventory?.currentStock || 0} {product?.unit}</div>
+            <div className="text-14px text-#666">
+              当前库存: {inventory?.currentStock || 0} {product?.unit}
+            </div>
           </div>
         </div>
       </div>

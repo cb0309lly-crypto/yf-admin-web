@@ -18,7 +18,4 @@ function convert(m: any) {
  * - 建议复用路由都通过前端自己手动配置去生成(在实际的开发中，复用路由的情况还是很少的)
  * - 所以开发量其实不会很大，其他的约定式都是自动生成并配置的
  */
-export const BaseChildrenRoutes = [
-  {
-  },
-] satisfies RouteObject[];
+export const BaseChildrenRoutes = [{}] satisfies RouteObject[];

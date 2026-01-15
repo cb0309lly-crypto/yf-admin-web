@@ -1,12 +1,12 @@
 const route: any = {
   '(base)_about': 'About',
   '(base)_function': 'System Function',
-  '(base)_function_inventory': 'Inventory Management',
   '(base)_function_event-bus': 'Event Bus Demo',
   '(base)_function_hide-child': 'Hide Child',
   '(base)_function_hide-child_one': 'Hide Child',
   '(base)_function_hide-child_three': 'Three',
   '(base)_function_hide-child_two': 'Two',
+  '(base)_function_inventory': 'Inventory Management',
   '(base)_function_multi-tab': 'Multi Tab',
   '(base)_function_request': 'Request',
   '(base)_function_super-page': 'Super Admin Visible',

@@ -9,8 +9,8 @@ import { request } from '../request';
 export function fetchLogin(username: string, password: string) {
   return request<Api.Auth.LoginToken>({
     data: {
-      username,
-      password
+      password,
+      username
     },
     method: 'post',
     url: '/auth/login'
@@ -49,25 +49,22 @@ export function fetchCustomBackendError(code: string, msg: string) {
 
 /**
  * 获取用户列表
+ *
  * @param params 查询参数
  */
-export function fetchUserList(params: {
-  page: number;
-  pageSize: number;
-  keyword?: string;
-}) {
+export function fetchUserList(params: { keyword?: string; page: number; pageSize: number }) {
   return request<{
     list: Array<{
-      no: string;
-      nickname: string;
-      phone: string;
-      avatar?: string;
       authLogin?: string;
+      avatar?: string;
+      nickname: string;
+      no: string;
+      phone: string;
     }>;
     total: number;
   }>({
-    url: '/auth/list',
     method: 'GET',
     params,
+    url: '/auth/list'
   });
 }

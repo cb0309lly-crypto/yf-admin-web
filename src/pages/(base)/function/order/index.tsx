@@ -2,15 +2,9 @@ import { Button, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag, mess
 import React, { useEffect, useRef, useState } from 'react';
 
 import ButtonIcon from '@/components/ButtonIcon';
-import SvgIcon from '@/components/SvgIcon';
 import OrderCreateModal from '@/components/OrderCreateModal';
-import {
-  deleteOrder,
-  fetchOrderDetail,
-  fetchOrderList,
-  updateOrder,
-  updateOrderStatus
-} from '@/service/api/order';
+import SvgIcon from '@/components/SvgIcon';
+import { deleteOrder, fetchOrderDetail, fetchOrderList, updateOrder, updateOrderStatus } from '@/service/api/order';
 import type { Order, OrderQueryParams, OrderStatus } from '@/types/order';
 
 const PAGE_SIZE = 8;
@@ -27,12 +21,12 @@ const ORDER_STATUS_OPTIONS = [
 ];
 
 const statusColor: Record<OrderStatus, string> = {
-  '已下单': 'blue',
-  '未付款': 'orange',
-  '已付款': 'green',
-  '已取消': 'red',
-  '已配送': 'purple',
-  '异常单': 'gray'
+  已下单: 'blue',
+  已付款: 'green',
+  已取消: 'red',
+  已配送: 'purple',
+  异常单: 'gray',
+  未付款: 'orange'
 };
 
 const OrderManage: React.FC = () => {
@@ -46,13 +40,13 @@ const OrderManage: React.FC = () => {
   const lastQuery = useRef({ page: 1, pageSize: PAGE_SIZE });
   const [searchForm] = Form.useForm();
   const [searchParams, setSearchParams] = useState<OrderQueryParams>({
+    customerNo: '',
+    keyword: '',
+    operatorNo: '',
+    orderStatus: '',
     page: 1,
     pageSize: PAGE_SIZE,
-    keyword: '',
-    userNo: '',
-    orderStatus: '',
-    operatorNo: '',
-    customerNo: ''
+    userNo: ''
   });
 
   // 获取订单列表
@@ -81,7 +75,6 @@ const OrderManage: React.FC = () => {
     loadOrders();
     // eslint-disable-next-line
   }, []);
-
 
   // 查询表单提交
   const handleSearch = () => {
@@ -159,16 +152,14 @@ const OrderManage: React.FC = () => {
     {
       dataIndex: 'orderTotal',
       key: 'orderTotal',
-      title: '订单总额',
-      render: (v: number) => v ? `¥${v.toFixed(2)}` : '-'
+      render: (v: number) => (v ? `¥${v.toFixed(2)}` : '-'),
+      title: '订单总额'
     },
     {
       dataIndex: 'orderStatus',
       key: 'orderStatus',
-      title: '订单状态',
-      render: (status: OrderStatus) => (
-        <Tag color={statusColor[status]}>{status}</Tag>
-      )
+      render: (status: OrderStatus) => <Tag color={statusColor[status]}>{status}</Tag>,
+      title: '订单状态'
     },
     { dataIndex: 'description', key: 'description', title: '订单描述' },
     { dataIndex: 'remark', key: 'remark', title: '备注' },
@@ -197,11 +188,11 @@ const OrderManage: React.FC = () => {
             编辑
           </Button>
           <Select
+            options={ORDER_STATUS_OPTIONS.filter(opt => opt.value !== '')}
             size="small"
             style={{ width: 100 }}
             value={record.orderStatus}
-            onChange={(value) => handleStatusChange(record.no, value)}
-            options={ORDER_STATUS_OPTIONS.filter(opt => opt.value !== '')}
+            onChange={value => handleStatusChange(record.no, value)}
           />
           <Popconfirm
             title="确定删除该订单吗？"
@@ -311,22 +302,22 @@ const OrderManage: React.FC = () => {
             onClick={() => {
               searchForm.resetFields();
               setSearchParams({
+                customerNo: '',
+                keyword: '',
+                operatorNo: '',
+                orderStatus: '',
                 page: 1,
                 pageSize: PAGE_SIZE,
-                keyword: '',
-                userNo: '',
-                orderStatus: '',
-                operatorNo: '',
-                customerNo: ''
+                userNo: ''
               });
               loadOrders(1, PAGE_SIZE, {
+                customerNo: '',
+                keyword: '',
+                operatorNo: '',
+                orderStatus: '',
                 page: 1,
                 pageSize: PAGE_SIZE,
-                keyword: '',
-                userNo: '',
-                orderStatus: '',
-                operatorNo: '',
-                customerNo: ''
+                userNo: ''
               });
             }}
           >
@@ -356,17 +347,17 @@ const OrderManage: React.FC = () => {
         onCancel={() => setModalOpen(false)}
         onSuccess={handleOrderCreateSuccess}
       />
-      
+
       {/* 订单编辑弹窗 */}
       {editing && (
         <Modal
-          destroyOnClose
           closable
+          destroyOnClose
           footer={null}
-          open={!!editing}
+          open={Boolean(editing)}
           title="编辑订单"
-          onCancel={() => setEditing(null)}
           width={800}
+          onCancel={() => setEditing(null)}
         >
           <Form
             form={form}
@@ -380,7 +371,10 @@ const OrderManage: React.FC = () => {
               >
                 <Select placeholder="请选择订单状态">
                   {ORDER_STATUS_OPTIONS.filter(opt => opt.value !== '').map(opt => (
-                    <Select.Option key={opt.value} value={opt.value}>
+                    <Select.Option
+                      key={opt.value}
+                      value={opt.value}
+                    >
                       {opt.label}
                     </Select.Option>
                   ))}
@@ -389,11 +383,13 @@ const OrderManage: React.FC = () => {
               <Form.Item
                 label="订单总额"
                 name="orderTotal"
-                rules={[
-                  { type: 'number', min: 0, message: '订单总额不能小于0' }
-                ]}
+                rules={[{ message: '订单总额不能小于0', min: 0, type: 'number' }]}
               >
-                <Input placeholder="请输入订单总额" type="number" step="0.01" />
+                <Input
+                  placeholder="请输入订单总额"
+                  step="0.01"
+                  type="number"
+                />
               </Form.Item>
               <Form.Item
                 label="操作员编号"
@@ -430,22 +426,36 @@ const OrderManage: React.FC = () => {
               label="收货地址"
               name="shipAddress"
             >
-              <Input.TextArea placeholder="请输入收货地址" rows={2} />
+              <Input.TextArea
+                placeholder="请输入收货地址"
+                rows={2}
+              />
             </Form.Item>
             <Form.Item
               label="订单描述"
               name="description"
             >
-              <Input.TextArea placeholder="请输入订单描述" rows={2} />
+              <Input.TextArea
+                placeholder="请输入订单描述"
+                rows={2}
+              />
             </Form.Item>
             <Form.Item
               label="备注"
               name="remark"
             >
-              <Input.TextArea placeholder="请输入备注" rows={2} />
+              <Input.TextArea
+                placeholder="请输入备注"
+                rows={2}
+              />
             </Form.Item>
             <Form.Item>
-              <Button htmlType="submit" type="primary">保存</Button>
+              <Button
+                htmlType="submit"
+                type="primary"
+              >
+                保存
+              </Button>
             </Form.Item>
           </Form>
         </Modal>

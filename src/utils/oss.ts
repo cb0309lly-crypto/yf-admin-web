@@ -2,10 +2,10 @@ import OSS from 'ali-oss';
 
 // OSS配置接口
 export interface OSSConfig {
-  region: string;
   accessKeyId: string;
   accessKeySecret: string;
   bucket: string;
+  region: string;
   secure?: boolean;
 }
 
@@ -22,11 +22,11 @@ let ossClient: OSS | null = null;
 // 初始化OSS客户端
 export const initOSS = (config: OSSConfig) => {
   ossClient = new OSS({
-    region: config.region,
     accessKeyId: config.accessKeyId,
     accessKeySecret: config.accessKeySecret,
     bucket: config.bucket,
-    secure: config.secure ?? true,
+    region: config.region,
+    secure: config.secure ?? true
   });
   return ossClient;
 };
@@ -45,7 +45,7 @@ export const generateFileName = (originalName: string, folder?: string): string 
   const random = Math.random().toString(36).substring(2, 15);
   const extension = originalName.split('.').pop() || '';
   const fileName = `${timestamp}_${random}.${extension}`;
-  
+
   if (folder) {
     return `${folder}/${fileName}`;
   }
@@ -56,24 +56,24 @@ export const generateFileName = (originalName: string, folder?: string): string 
 export const uploadToOSS = async (
   file: File,
   options: UploadOptions = {}
-): Promise<{ url: string; fileName: string }> => {
+): Promise<{ fileName: string; url: string }> => {
   const client = getOSSClient();
-  
+
   const { fileName, folder, onProgress } = options;
   const finalFileName = fileName || generateFileName(file.name, folder);
-  
+
   try {
     const result = await client.put(finalFileName, file, {
       progress: (p: number) => {
         if (onProgress) {
           onProgress(Math.round(p * 100));
         }
-      },
+      }
     });
-    
+
     return {
-      url: result.url,
       fileName: finalFileName,
+      url: result.url
     };
   } catch (error) {
     console.error('OSS上传失败:', error);
@@ -84,7 +84,7 @@ export const uploadToOSS = async (
 // 删除OSS文件
 export const deleteFromOSS = async (fileName: string): Promise<void> => {
   const client = getOSSClient();
-  
+
   try {
     await client.delete(fileName);
   } catch (error) {
@@ -94,7 +94,10 @@ export const deleteFromOSS = async (fileName: string): Promise<void> => {
 };
 
 // 检查文件类型
-export const validateFileType = (file: File, allowedTypes: string[] = ['image/jpeg', 'image/png', 'image/gif']): boolean => {
+export const validateFileType = (
+  file: File,
+  allowedTypes: string[] = ['image/jpeg', 'image/png', 'image/gif']
+): boolean => {
   return allowedTypes.includes(file.type);
 };
 
@@ -109,27 +112,27 @@ export const compressImage = (file: File, quality: number = 0.8, maxWidth: numbe
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
-    
+
     img.onload = () => {
       // 计算压缩后的尺寸
-      let { width, height } = img;
+      let { height, width } = img;
       if (width > maxWidth) {
         height = (height * maxWidth) / width;
         width = maxWidth;
       }
-      
+
       canvas.width = width;
       canvas.height = height;
-      
+
       // 绘制压缩后的图片
       ctx?.drawImage(img, 0, 0, width, height);
-      
+
       canvas.toBlob(
-        (blob) => {
+        blob => {
           if (blob) {
             const compressedFile = new File([blob], file.name, {
-              type: file.type,
               lastModified: Date.now(),
+              type: file.type
             });
             resolve(compressedFile);
           } else {
@@ -140,7 +143,7 @@ export const compressImage = (file: File, quality: number = 0.8, maxWidth: numbe
         quality
       );
     };
-    
+
     img.onerror = () => reject(new Error('图片加载失败'));
     img.src = URL.createObjectURL(file);
   });

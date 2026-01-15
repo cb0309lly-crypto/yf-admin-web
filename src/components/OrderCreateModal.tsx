@@ -22,7 +22,7 @@ interface CartItem extends Cart {
   product?: Product;
 }
 
-const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onSuccess }) => {
+const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ onCancel, onSuccess, open }) => {
   const [form] = Form.useForm();
   const [step, setStep] = useState(1); // 1: 选择用户, 2: 选择商品, 3: 确认订单
 
@@ -75,9 +75,9 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
     setUserLoading(true);
     try {
       const response = await fetchUserList({
+        keyword: value,
         page: 1,
-        pageSize: 20,
-        keyword: value
+        pageSize: 20
       });
       const data = response?.data || response;
       setUsers(data?.list || []);
@@ -108,9 +108,9 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
     setProductLoading(true);
     try {
       const response = await fetchProductList({
+        keyword: value,
         page: 1,
-        pageSize: 20,
-        keyword: value
+        pageSize: 20
       });
       const data = response?.data || response;
       setProducts(data?.list || data?.records || []);
@@ -121,8 +121,6 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
       setProductLoading(false);
     }
   };
-
-
 
   // 加载用户购物车
   const loadUserCart = async () => {
@@ -144,7 +142,7 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
     }
   };
 
-// 添加商品到购物车
+  // 添加商品到购物车
   const handleAddToCart = async (product: Product, quantity: number = 1) => {
     if (!selectedUser) {
       message.error('请先选择用户');
@@ -153,9 +151,9 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
 
     try {
       await addToCart({
-        userNo: selectedUser.no,
         productNo: product.no,
-        quantity
+        quantity,
+        userNo: selectedUser.no
       });
 
       message.success('商品已添加到购物车');
@@ -172,8 +170,8 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
 
     try {
       await removeFromCart({
-        userNo: selectedUser.no,
-        productNo: cartItem.productNo
+        productNo: cartItem.productNo,
+        userNo: selectedUser.no
       });
 
       message.success('商品已从购物车移除');
@@ -285,100 +283,104 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
   // 购物车表格列定义
   const cartColumns = [
     {
-      title: '商品信息',
       key: 'product',
       render: (_: any, record: CartItem) => (
         <div className="flex items-center">
           {record.product?.imgUrl && (
             <img
-              src={record.product.imgUrl}
               alt={record.product.name}
-              className="w-12 h-12 object-cover rounded mr-3"
+              className="mr-3 h-12 w-12 rounded object-cover"
+              src={record.product.imgUrl}
             />
           )}
           <div>
             <div className="font-medium">{record.product?.name || '未知商品'}</div>
-            <div className="text-gray-500 text-sm">
-              {record.product?.specs && `规格: ${record.product.specs}`}
-            </div>
+            <div className="text-sm text-gray-500">{record.product?.specs && `规格: ${record.product.specs}`}</div>
           </div>
         </div>
-      )
+      ),
+      title: '商品信息'
     },
     {
-      title: '单价',
       dataIndex: 'unitPrice',
       key: 'unitPrice',
-      render: (price: any) => formatPrice(price)
+      render: (price: any) => formatPrice(price),
+      title: '单价'
     },
     {
-      title: '数量',
       key: 'quantity',
       render: (_: any, record: CartItem) => (
         <Space>
           <Button
-            size="small"
             icon={<MinusOutlined />}
+            size="small"
             onClick={() => handleUpdateQuantity(record, record.quantity - 1)}
           />
           <span className="w-12 text-center">{record.quantity}</span>
           <Button
-            size="small"
             icon={<PlusOutlined />}
+            size="small"
             onClick={() => handleUpdateQuantity(record, record.quantity + 1)}
           />
         </Space>
-      )
+      ),
+      title: '数量'
     },
     {
-      title: '小计',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
-      render: (price: any) => formatPrice(price)
+      render: (price: any) => formatPrice(price),
+      title: '小计'
     },
     {
-      title: '操作',
       key: 'action',
       render: (_: any, record: CartItem) => (
         <Button
           danger
-          size="small"
           icon={<DeleteOutlined />}
+          size="small"
           onClick={() => handleRemoveFromCart(record)}
         >
           移除
         </Button>
-      )
+      ),
+      title: '操作'
     }
   ];
 
   return (
     <Modal
-      title="创建订单"
-      open={open}
-      onCancel={handleCancel}
-      width={1000}
-      footer={null}
       destroyOnClose
+      footer={null}
+      open={open}
+      title="创建订单"
+      width={1000}
+      onCancel={handleCancel}
     >
       <div className="space-y-6">
         {/* 步骤指示器 */}
         <div className="flex items-center justify-center space-x-4">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${
-            step >= 1 ? 'bg-blue-500' : 'bg-gray-300'
-          }`}>
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${
+              step >= 1 ? 'bg-blue-500' : 'bg-gray-300'
+            }`}
+          >
             1
           </div>
           <div className={`w-16 h-1 ${step >= 2 ? 'bg-blue-500' : 'bg-gray-300'}`} />
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${
-            step >= 2 ? 'bg-blue-500' : 'bg-gray-300'
-          }`}>
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${
+              step >= 2 ? 'bg-blue-500' : 'bg-gray-300'
+            }`}
+          >
             2
           </div>
           <div className={`w-16 h-1 ${step >= 3 ? 'bg-blue-500' : 'bg-gray-300'}`} />
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${
-            step >= 3 ? 'bg-blue-500' : 'bg-gray-300'
-          }`}>
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${
+              step >= 3 ? 'bg-blue-500' : 'bg-gray-300'
+            }`}
+          >
             3
           </div>
         </div>
@@ -390,18 +392,18 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
             <Form.Item
               label="用户"
               name="userNo"
-              rules={[{ required: true, message: '请选择用户' }]}
+              rules={[{ message: '请选择用户', required: true }]}
             >
               <AutoComplete
+                filterOption={false}
+                loading={userLoading}
+                placeholder="请搜索并选择用户"
                 options={users.map(user => ({
-                  value: user.no,
-                  label: `${user.nickname} - ${user.phone}${user.authLogin ? ` (${user.authLogin})` : ''}`
+                  label: `${user.nickname} - ${user.phone}${user.authLogin ? ` (${user.authLogin})` : ''}`,
+                  value: user.no
                 }))}
                 onSearch={searchUsers}
                 onSelect={handleUserSelect}
-                placeholder="请搜索并选择用户"
-                loading={userLoading}
-                filterOption={false}
               />
             </Form.Item>
             {selectedUser && (
@@ -409,14 +411,14 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
                 <div className="flex items-center space-x-4">
                   {selectedUser.avatar && (
                     <img
-                      src={selectedUser.avatar}
                       alt={selectedUser.nickname}
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="h-10 w-10 rounded-full object-cover"
+                      src={selectedUser.avatar}
                     />
                   )}
                   <div>
                     <div className="font-medium">{selectedUser.nickname}</div>
-                    <div className="text-gray-500 text-sm">
+                    <div className="text-sm text-gray-500">
                       {selectedUser.phone} {selectedUser.authLogin && `(${selectedUser.authLogin})`}
                     </div>
                   </div>
@@ -433,15 +435,15 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
             <div className="flex space-x-4">
               <AutoComplete
                 className="flex-1"
+                filterOption={false}
+                loading={productLoading}
+                placeholder="搜索商品..."
                 options={products.map(product => ({
-                  value: product.no,
-                  label: `${product.name} - ¥${product.price || 0} - ${product.status || '未知状态'}`
+                  label: `${product.name} - ¥${product.price || 0} - ${product.status || '未知状态'}`,
+                  value: product.no
                 }))}
                 onSearch={searchProducts}
-                placeholder="搜索商品..."
-                loading={productLoading}
-                filterOption={false}
-                onSelect={(value) => {
+                onSelect={value => {
                   const product = products.find(p => p.no === value);
                   if (product) {
                     handleAddToCart(product, 1);
@@ -457,8 +459,8 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
               columns={cartColumns}
               dataSource={cartItems}
               loading={cartLoading}
-              rowKey="no"
               pagination={false}
+              rowKey="no"
               size="small"
             />
 
@@ -475,20 +477,30 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
           <div className="space-y-4">
             <h3 className="text-lg font-medium">确认订单信息</h3>
 
-            <Form form={form} layout="vertical" onFinish={handleSubmit}>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSubmit}
+            >
               <div className="grid grid-cols-2 gap-4">
                 <Form.Item
                   label="收货地址"
                   name="shipAddress"
-                  rules={[{ required: true, message: '请输入收货地址' }]}
+                  rules={[{ message: '请输入收货地址', required: true }]}
                 >
-                  <Input.TextArea placeholder="请输入收货地址" rows={2} />
+                  <Input.TextArea
+                    placeholder="请输入收货地址"
+                    rows={2}
+                  />
                 </Form.Item>
                 <Form.Item
                   label="订单描述"
                   name="description"
                 >
-                  <Input.TextArea placeholder="请输入订单描述" rows={2} />
+                  <Input.TextArea
+                    placeholder="请输入订单描述"
+                    rows={2}
+                  />
                 </Form.Item>
                 <Form.Item
                   label="操作员编号"
@@ -512,7 +524,10 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
                   label="备注"
                   name="remark"
                 >
-                  <Input.TextArea placeholder="请输入备注" rows={2} />
+                  <Input.TextArea
+                    placeholder="请输入备注"
+                    rows={2}
+                  />
                 </Form.Item>
               </div>
 
@@ -524,8 +539,8 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
                   columns={cartColumns}
                   dataSource={cartItems}
                   loading={cartLoading}
-                  rowKey="no"
                   pagination={false}
+                  rowKey="no"
                   size="small"
                 />
                 <div className="text-right">
@@ -540,19 +555,21 @@ const OrderCreateModal: React.FC<OrderCreateModalProps> = ({ open, onCancel, onS
 
         {/* 操作按钮 */}
         <div className="flex justify-between">
-          <div>
-            {step > 1 && (
-              <Button onClick={handlePrev}>上一步</Button>
-            )}
-          </div>
+          <div>{step > 1 && <Button onClick={handlePrev}>上一步</Button>}</div>
           <div className="space-x-2">
             <Button onClick={handleCancel}>取消</Button>
             {step < 3 ? (
-              <Button type="primary" onClick={handleNext}>
+              <Button
+                type="primary"
+                onClick={handleNext}
+              >
                 下一步
               </Button>
             ) : (
-              <Button type="primary" onClick={() => form.submit()}>
+              <Button
+                type="primary"
+                onClick={() => form.submit()}
+              >
                 提交订单
               </Button>
             )}
