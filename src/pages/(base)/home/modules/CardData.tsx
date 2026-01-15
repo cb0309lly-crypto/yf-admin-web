@@ -1,4 +1,8 @@
+import { useTranslation } from 'react-i18next';
 import NumberTicker from '@/components/NumberTicker';
+import SvgIcon from '@/components/SvgIcon';
+import { fetchCardData } from '@/service/api/stats';
+import { useEffect, useState } from 'react';
 
 interface CardDataProps {
   color: {
@@ -14,59 +18,6 @@ interface CardDataProps {
 
 function getGradientColor(color: CardDataProps['color']) {
   return `linear-gradient(to bottom right, ${color.start}, ${color.end})`;
-}
-
-function useGetCardData() {
-  const { t } = useTranslation();
-
-  const cardData: CardDataProps[] = [
-    {
-      color: {
-        end: '#b955a4',
-        start: '#ec4786'
-      },
-      icon: 'ant-design:bar-chart-outlined',
-      key: 'visitCount',
-      title: t('page.home.visitCount'),
-      unit: '',
-      value: 9725
-    },
-    {
-      color: {
-        end: '#5144b4',
-        start: '#865ec0'
-      },
-      icon: 'ant-design:money-collect-outlined',
-      key: 'turnover',
-      title: t('page.home.turnover'),
-      unit: '$',
-      value: 1026
-    },
-    {
-      color: {
-        end: '#719de3',
-        start: '#56cdf3'
-      },
-      icon: 'carbon:document-download',
-      key: 'downloadCount',
-      title: t('page.home.downloadCount'),
-      unit: '',
-      value: 970925
-    },
-    {
-      color: {
-        end: '#f68057',
-        start: '#fcbc25'
-      },
-      icon: 'ant-design:trademark-circle-outlined',
-      key: 'dealCount',
-      title: t('page.home.dealCount'),
-      unit: '',
-      value: 9527
-    }
-  ];
-
-  return cardData;
 }
 
 const CardItem = (data: CardDataProps) => {
@@ -99,7 +50,53 @@ const CardItem = (data: CardDataProps) => {
 };
 
 const CardData = () => {
-  const data = useGetCardData();
+  const { t } = useTranslation();
+  const [data, setData] = useState<CardDataProps[]>([]);
+
+  const loadData = async () => {
+    const { data: stats } = await fetchCardData();
+    if (stats) {
+      const cardConfigs = [
+        {
+          color: { end: '#b955a4', start: '#ec4786' },
+          icon: 'ant-design:bar-chart-outlined',
+          key: 'visitCount',
+          title: t('page.home.visitCount'),
+          unit: '',
+          value: stats.visitCount
+        },
+        {
+          color: { end: '#5144b4', start: '#865ec0' },
+          icon: 'ant-design:money-collect-outlined',
+          key: 'turnover',
+          title: t('page.home.turnover'),
+          unit: '¥',
+          value: stats.turnover
+        },
+        {
+          color: { end: '#719de3', start: '#56cdf3' },
+          icon: 'carbon:document-download',
+          key: 'downloadCount',
+          title: t('page.home.downloadCount'),
+          unit: '',
+          value: stats.downloadCount
+        },
+        {
+          color: { end: '#f68057', start: '#fcbc25' },
+          icon: 'ant-design:trademark-circle-outlined',
+          key: 'dealCount',
+          title: t('page.home.dealCount'),
+          unit: '',
+          value: stats.dealCount
+        }
+      ];
+      setData(cardConfigs);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   return (
     <ACard
