@@ -460,6 +460,25 @@ const OrderManage: React.FC = () => {
           </Form>
         </Modal>
       )}
+
+      {/* 物流单号弹窗 */}
+      <Modal
+        title="填写物流单号"
+        open={logisticsModalVisible}
+        onCancel={() => setLogisticsModalVisible(false)}
+        onOk={handleLogisticsSubmit}
+        destroyOnClose
+      >
+        <Form form={logisticsForm} layout="vertical">
+          <Form.Item
+            name="logisticsNo"
+            label="物流单号"
+            rules={[{ required: true, message: '请输入物流单号' }]}
+          >
+            <Input placeholder="请输入物流单号" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

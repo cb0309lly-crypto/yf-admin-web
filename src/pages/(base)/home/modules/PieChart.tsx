@@ -1,4 +1,8 @@
+import { useTranslation } from 'react-i18next';
+import { useEcharts } from '@/hooks/common/echarts';
 import { useLang } from '@/features/lang';
+import { useMount, useUpdateEffect } from 'ahooks';
+import { fetchPieChartData } from '@/service/api/stats';
 
 const PieChart = () => {
   const { t } = useTranslation();
@@ -36,7 +40,7 @@ const PieChart = () => {
         labelLine: {
           show: false
         },
-        name: t('page.home.schedule'),
+        name: '订单状态分布',
         radius: ['45%', '75%'],
         type: 'pie'
       }
@@ -47,35 +51,19 @@ const PieChart = () => {
   }));
 
   async function mockData() {
-    await new Promise(resolve => {
-      setTimeout(resolve, 1000);
-    });
-
-    updateOptions(opts => {
-      opts.series[0].data = [
-        { name: t('page.home.study'), value: 20 },
-        { name: t('page.home.entertainment'), value: 10 },
-        { name: t('page.home.work'), value: 40 },
-        { name: t('page.home.rest'), value: 30 }
-      ];
-
-      return opts;
-    });
+    const { data } = await fetchPieChartData();
+    if (data) {
+      updateOptions(opts => {
+        opts.series[0].data = data;
+        return opts;
+      });
+    }
   }
 
   function updateLocale() {
     updateOptions((opts, factory) => {
       const originOpts = factory();
-
       opts.series[0].name = originOpts.series[0].name;
-
-      opts.series[0].data = [
-        { name: t('page.home.study'), value: 20 },
-        { name: t('page.home.entertainment'), value: 10 },
-        { name: t('page.home.work'), value: 40 },
-        { name: t('page.home.rest'), value: 30 }
-      ];
-
       return opts;
     });
   }

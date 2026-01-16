@@ -351,7 +351,7 @@ const ProductManage: React.FC = () => {
             name="imgUrl"
           >
             <Upload
-              beforeUpload={handleBeforeUpload}
+              customRequest={customUpload}
               fileList={fileList}
               listType="picture-card"
               maxCount={1}
