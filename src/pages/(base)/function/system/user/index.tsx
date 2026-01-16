@@ -1,7 +1,8 @@
 import { Button, Form, Input, Modal, Select, Space, Table, Tag, message } from 'antd';
 import React, { useEffect, useState } from 'react';
+
 import SvgIcon from '@/components/SvgIcon';
-import { fetchGetUserList, fetchGetAllRoles } from '@/service/api/system-manage';
+import { fetchGetAllRoles, fetchGetUserList } from '@/service/api/system-manage';
 import { request } from '@/service/request';
 import type { Api } from '@/types/api';
 
@@ -10,7 +11,7 @@ const UserManage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [searchForm] = Form.useForm();
-  
+
   // Role Modal
   const [roleModalVisible, setRoleModalVisible] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
@@ -61,12 +62,12 @@ const UserManage: React.FC = () => {
       const values = await roleForm.validateFields();
       if (currentUserId) {
         await request({
-          url: '/systemManage/updateUserRole',
-          method: 'post',
           data: {
-            userId: currentUserId,
-            roleCodes: values.roleCodes
-          }
+            roleCodes: values.roleCodes,
+            userId: currentUserId
+          },
+          method: 'post',
+          url: '/systemManage/updateUserRole'
         });
         message.success('更新角色成功');
         setRoleModalVisible(false);
@@ -78,73 +79,105 @@ const UserManage: React.FC = () => {
   };
 
   const columns = [
-    { title: '用户名', dataIndex: 'userName', key: 'userName' },
-    { title: '昵称', dataIndex: 'nickName', key: 'nickName' },
-    { title: '手机号', dataIndex: 'userPhone', key: 'userPhone' },
-    { 
-      title: '角色', 
-      dataIndex: 'userRoles', 
+    { dataIndex: 'userName', key: 'userName', title: '用户名' },
+    { dataIndex: 'nickName', key: 'nickName', title: '昵称' },
+    { dataIndex: 'userPhone', key: 'userPhone', title: '手机号' },
+    {
+      dataIndex: 'userRoles',
       key: 'userRoles',
       render: (roles: string[]) => (
         <Space>
           {roles.map(role => {
             const roleName = allRoles.find(r => r.roleCode === role)?.roleName || role;
-            return <Tag key={role} color="blue">{roleName}</Tag>;
+            return (
+              <Tag
+                color="blue"
+                key={role}
+              >
+                {roleName}
+              </Tag>
+            );
           })}
         </Space>
-      )
+      ),
+      title: '角色'
     },
-    { 
-      title: '状态', 
-      dataIndex: 'status', 
+    {
+      dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
         <Tag color={status === 'active' || status === '1' ? 'green' : 'red'}>
           {status === 'active' || status === '1' ? '正常' : '禁用'}
         </Tag>
-      )
+      ),
+      title: '状态'
     },
     {
-      title: '操作',
       key: 'action',
       render: (_: any, record: Api.SystemManage.User) => (
         <Space>
-          <Button type="link" onClick={() => handleEditRole(record)}>分配角色</Button>
+          <Button
+            type="link"
+            onClick={() => handleEditRole(record)}
+          >
+            分配角色
+          </Button>
         </Space>
-      )
+      ),
+      title: '操作'
     }
   ];
 
   return (
     <div className="p-16px">
-      <div className="mb-16px flex justify-between items-center">
-        <h2 className="text-20px font-bold flex items-center">
-          <SvgIcon icon="ant-design:user-outlined" className="mr-8px" />
+      <div className="mb-16px flex items-center justify-between">
+        <h2 className="flex items-center text-20px font-bold">
+          <SvgIcon
+            className="mr-8px"
+            icon="ant-design:user-outlined"
+          />
           用户管理
         </h2>
       </div>
-      
-      <div className="bg-white p-16px rd-8px shadow-sm mb-16px">
-        <Form form={searchForm} layout="inline" onFinish={handleSearch}>
-          <Form.Item name="nickName" label="昵称">
+
+      <div className="mb-16px rd-8px bg-white p-16px shadow-sm">
+        <Form
+          form={searchForm}
+          layout="inline"
+          onFinish={handleSearch}
+        >
+          <Form.Item
+            label="昵称"
+            name="nickName"
+          >
             <Input placeholder="请输入" />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit">查询</Button>
-            <Button className="ml-8px" onClick={() => {
-              searchForm.resetFields();
-              handleSearch();
-            }}>重置</Button>
+            <Button
+              htmlType="submit"
+              type="primary"
+            >
+              查询
+            </Button>
+            <Button
+              className="ml-8px"
+              onClick={() => {
+                searchForm.resetFields();
+                handleSearch();
+              }}
+            >
+              重置
+            </Button>
           </Form.Item>
         </Form>
       </div>
 
-      <div className="bg-white p-16px rd-8px shadow-sm">
+      <div className="rd-8px bg-white p-16px shadow-sm">
         <Table
           columns={columns}
           dataSource={data}
-          rowKey="id"
           loading={loading}
+          rowKey="id"
           pagination={{
             ...pagination,
             onChange: (page, pageSize) => loadData(page, pageSize),
@@ -154,18 +187,25 @@ const UserManage: React.FC = () => {
       </div>
 
       <Modal
-        title="分配角色"
+        destroyOnClose
         open={roleModalVisible}
+        title="分配角色"
         onCancel={() => setRoleModalVisible(false)}
         onOk={handleRoleSubmit}
-        destroyOnClose
       >
-        <Form form={roleForm} layout="vertical">
-          <Form.Item name="roleCodes" label="角色" rules={[{ required: true, message: '请选择角色' }]}>
+        <Form
+          form={roleForm}
+          layout="vertical"
+        >
+          <Form.Item
+            label="角色"
+            name="roleCodes"
+            rules={[{ message: '请选择角色', required: true }]}
+          >
             <Select
               mode="multiple"
-              placeholder="请选择角色"
               options={allRoles.map(r => ({ label: r.roleName, value: r.roleCode }))}
+              placeholder="请选择角色"
             />
           </Form.Item>
         </Form>

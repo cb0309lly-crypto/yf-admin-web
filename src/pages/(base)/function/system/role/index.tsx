@@ -1,7 +1,8 @@
 import { Button, Form, Input, Modal, Select, Space, Table, Tag, message } from 'antd';
 import React, { useEffect, useState } from 'react';
-import SvgIcon from '@/components/SvgIcon';
+
 import ButtonIcon from '@/components/ButtonIcon';
+import SvgIcon from '@/components/SvgIcon';
 import { fetchGetRoleList } from '@/service/api/system-manage';
 import type { Api } from '@/types/api';
 
@@ -10,7 +11,7 @@ const RoleManage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [searchForm] = Form.useForm();
-  
+
   const loadData = async (current = 1, pageSize = 10) => {
     setLoading(true);
     try {
@@ -40,70 +41,109 @@ const RoleManage: React.FC = () => {
   };
 
   const columns = [
-    { title: '角色名称', dataIndex: 'roleName', key: 'roleName' },
-    { title: '角色编码', dataIndex: 'roleCode', key: 'roleCode' },
-    { title: '描述', dataIndex: 'roleDesc', key: 'roleDesc' },
-    { 
-      title: '状态', 
-      dataIndex: 'status', 
+    { dataIndex: 'roleName', key: 'roleName', title: '角色名称' },
+    { dataIndex: 'roleCode', key: 'roleCode', title: '角色编码' },
+    { dataIndex: 'roleDesc', key: 'roleDesc', title: '描述' },
+    {
+      dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
-        <Tag color={status === '1' ? 'green' : 'red'}>
-          {status === '1' ? '启用' : '禁用'}
-        </Tag>
-      )
+        <Tag color={status === '1' ? 'green' : 'red'}>{status === '1' ? '启用' : '禁用'}</Tag>
+      ),
+      title: '状态'
     },
     {
-      title: '操作',
       key: 'action',
       render: (_: any) => (
         <Space>
-          <Button type="link" disabled>编辑</Button>
-          <Button type="link" danger disabled>删除</Button>
+          <Button
+            disabled
+            type="link"
+          >
+            编辑
+          </Button>
+          <Button
+            danger
+            disabled
+            type="link"
+          >
+            删除
+          </Button>
         </Space>
-      )
+      ),
+      title: '操作'
     }
   ];
 
   return (
     <div className="p-16px">
-      <div className="mb-16px flex justify-between items-center">
-        <h2 className="text-20px font-bold flex items-center">
-          <SvgIcon icon="ant-design:safety-certificate-outlined" className="mr-8px" />
+      <div className="mb-16px flex items-center justify-between">
+        <h2 className="flex items-center text-20px font-bold">
+          <SvgIcon
+            className="mr-8px"
+            icon="ant-design:safety-certificate-outlined"
+          />
           角色管理
         </h2>
-        <ButtonIcon type="primary" icon="ant-design:plus-outlined">
+        <ButtonIcon
+          icon="ant-design:plus-outlined"
+          type="primary"
+        >
           新增角色
         </ButtonIcon>
       </div>
-      
-      <div className="bg-white p-16px rd-8px shadow-sm mb-16px">
-        <Form form={searchForm} layout="inline" onFinish={handleSearch}>
-          <Form.Item name="roleName" label="角色名称">
+
+      <div className="mb-16px rd-8px bg-white p-16px shadow-sm">
+        <Form
+          form={searchForm}
+          layout="inline"
+          onFinish={handleSearch}
+        >
+          <Form.Item
+            label="角色名称"
+            name="roleName"
+          >
             <Input placeholder="请输入" />
           </Form.Item>
-          <Form.Item name="status" label="状态">
-            <Select placeholder="请选择" style={{ width: 120 }} allowClear>
+          <Form.Item
+            label="状态"
+            name="status"
+          >
+            <Select
+              allowClear
+              placeholder="请选择"
+              style={{ width: 120 }}
+            >
               <Select.Option value="1">启用</Select.Option>
               <Select.Option value="0">禁用</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit">查询</Button>
-            <Button className="ml-8px" onClick={() => {
-              searchForm.resetFields();
-              handleSearch();
-            }}>重置</Button>
+            <Button
+              htmlType="submit"
+              type="primary"
+            >
+              查询
+            </Button>
+            <Button
+              className="ml-8px"
+              onClick={() => {
+                searchForm.resetFields();
+                handleSearch();
+              }}
+            >
+              重置
+            </Button>
           </Form.Item>
         </Form>
       </div>
 
-      <div className="bg-white p-16px rd-8px shadow-sm">
+      <div className="rd-8px bg-white p-16px shadow-sm">
         <Table
           columns={columns}
           dataSource={data}
-          rowKey="id"
           loading={loading}
+          rowKey="id"
           pagination={{
             ...pagination,
             onChange: (page, pageSize) => loadData(page, pageSize),

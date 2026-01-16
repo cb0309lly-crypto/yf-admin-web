@@ -29,6 +29,18 @@ export const generatedRoutes: ElegantConstRoute[] = [
             handle: { i18nKey: 'route.(base)_function', title: '(base)_function' },
             children: [
               {
+                matchedFiles: [null, '/src/pages/(base)/function/category/index.tsx', null, null],
+                name: '(base)_function_category',
+                path: '/function/category',
+                handle: { i18nKey: 'route.(base)_function_category', title: '(base)_function_category' }
+              },
+              {
+                matchedFiles: [null, '/src/pages/(base)/function/coupon/index.tsx', null, null],
+                name: '(base)_function_coupon',
+                path: '/function/coupon',
+                handle: { i18nKey: 'route.(base)_function_coupon', title: '(base)_function_coupon' }
+              },
+              {
                 matchedFiles: [null, '/src/pages/(base)/function/logistics/index.tsx', null, null],
                 name: '(base)_function_logistics',
                 path: '/function/logistics',
@@ -45,6 +57,44 @@ export const generatedRoutes: ElegantConstRoute[] = [
                 name: '(base)_function_product',
                 path: '/function/product',
                 handle: { i18nKey: 'route.(base)_function_product', title: '(base)_function_product' }
+              },
+              {
+                matchedFiles: [null, '/src/pages/(base)/function/promotion/index.tsx', null, null],
+                name: '(base)_function_promotion',
+                path: '/function/promotion',
+                handle: { i18nKey: 'route.(base)_function_promotion', title: '(base)_function_promotion' }
+              },
+              {
+                matchedFiles: [null, '/src/pages/(base)/function/refund/index.tsx', null, null],
+                name: '(base)_function_refund',
+                path: '/function/refund',
+                handle: { i18nKey: 'route.(base)_function_refund', title: '(base)_function_refund' }
+              },
+              {
+                matchedFiles: [null, '/src/pages/(base)/function/review/index.tsx', null, null],
+                name: '(base)_function_review',
+                path: '/function/review',
+                handle: { i18nKey: 'route.(base)_function_review', title: '(base)_function_review' }
+              },
+              {
+                matchedFiles: [null, null, null, null],
+                name: '(base)_function_system',
+                path: '/function/system',
+                handle: { i18nKey: 'route.(base)_function_system', title: '(base)_function_system' },
+                children: [
+                  {
+                    matchedFiles: [null, '/src/pages/(base)/function/system/role/index.tsx', null, null],
+                    name: '(base)_function_system_role',
+                    path: '/function/system/role',
+                    handle: { i18nKey: 'route.(base)_function_system_role', title: '(base)_function_system_role' }
+                  },
+                  {
+                    matchedFiles: [null, '/src/pages/(base)/function/system/user/index.tsx', null, null],
+                    name: '(base)_function_system_user',
+                    path: '/function/system/user',
+                    handle: { i18nKey: 'route.(base)_function_system_user', title: '(base)_function_system_user' }
+                  }
+                ]
               }
             ]
           },

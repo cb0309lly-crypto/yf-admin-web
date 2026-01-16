@@ -29,9 +29,17 @@ declare module "@soybean-react/vite-plugin-react-router" {
     "document_procomponents": "/document/procomponents";
     "document_antd": "/document/antd";
     "(base)_function": "/function";
+    "(base)_function_category": "/function/category";
+    "(base)_function_coupon": "/function/coupon";
     "(base)_function_logistics": "/function/logistics";
     "(base)_function_order": "/function/order";
     "(base)_function_product": "/function/product";
+    "(base)_function_promotion": "/function/promotion";
+    "(base)_function_refund": "/function/refund";
+    "(base)_function_review": "/function/review";
+    "(base)_function_system": "/function/system";
+    "(base)_function_system_role": "/function/system/role";
+    "(base)_function_system_user": "/function/system/user";
     "(base)_home": "/home";
     "(blank)_login": "/login";
     "(blank)_login_code-login": "/login/code-login";
@@ -101,10 +109,17 @@ declare module "@soybean-react/vite-plugin-react-router" {
    */
   export type LastLevelRouteKey = Extract<
     RouteKey,
+    | "(base)_function_category"
+    | "(base)_function_coupon"
     | "(base)_function"
     | "(base)_function_logistics"
     | "(base)_function_order"
     | "(base)_function_product"
+    | "(base)_function_promotion"
+    | "(base)_function_refund"
+    | "(base)_function_review"
+    | "(base)_function_system_role"
+    | "(base)_function_system_user"
     | "(base)_home"
     | "(base)"
     | "(blank)"

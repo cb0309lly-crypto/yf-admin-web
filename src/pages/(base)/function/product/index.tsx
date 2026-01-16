@@ -322,7 +322,7 @@ const ProductManage: React.FC = () => {
           columns={columns}
           dataSource={products}
           loading={loading}
-          rowKey="id"
+          rowKey="no"
           pagination={{
             current: pagination.current,
             onChange: (page, pageSize) => loadProducts(page, pageSize, searchParams),
@@ -351,7 +351,7 @@ const ProductManage: React.FC = () => {
             name="imgUrl"
           >
             <Upload
-              customRequest={customUpload}
+              beforeUpload={handleBeforeUpload}
               fileList={fileList}
               listType="picture-card"
               maxCount={1}

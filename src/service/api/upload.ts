@@ -2,6 +2,7 @@ import { request } from '@/service/request';
 
 /**
  * 上传文件
+ *
  * @param file - 文件对象
  */
 export function uploadFile(file: File) {
@@ -9,11 +10,11 @@ export function uploadFile(file: File) {
   formData.append('file', file);
 
   return request<{ url: string }>({
-    url: '/upload/file',
-    method: 'post',
     data: formData,
     headers: {
       'Content-Type': 'multipart/form-data'
-    }
+    },
+    method: 'post',
+    url: '/upload/file'
   });
 }

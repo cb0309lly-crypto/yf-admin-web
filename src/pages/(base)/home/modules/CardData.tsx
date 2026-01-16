@@ -1,8 +1,9 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import NumberTicker from '@/components/NumberTicker';
 import SvgIcon from '@/components/SvgIcon';
 import { fetchCardData } from '@/service/api/stats';
-import { useEffect, useState } from 'react';
 
 interface CardDataProps {
   color: {

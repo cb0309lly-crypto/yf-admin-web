@@ -17,10 +17,17 @@ export const layouts: Record<string, () => Promise<any>> = {
 };
 
 export const pages: Record<string, () => Promise<any>> = {
+"(base)_function_category": () => import("@/pages/(base)/function/category/index.tsx"),
+"(base)_function_coupon": () => import("@/pages/(base)/function/coupon/index.tsx"),
 "(base)_function": () => import("@/pages/(base)/function/index.tsx"),
 "(base)_function_logistics": () => import("@/pages/(base)/function/logistics/index.tsx"),
 "(base)_function_order": () => import("@/pages/(base)/function/order/index.tsx"),
 "(base)_function_product": () => import("@/pages/(base)/function/product/index.tsx"),
+"(base)_function_promotion": () => import("@/pages/(base)/function/promotion/index.tsx"),
+"(base)_function_refund": () => import("@/pages/(base)/function/refund/index.tsx"),
+"(base)_function_review": () => import("@/pages/(base)/function/review/index.tsx"),
+"(base)_function_system_role": () => import("@/pages/(base)/function/system/role/index.tsx"),
+"(base)_function_system_user": () => import("@/pages/(base)/function/system/user/index.tsx"),
 "(base)_home": () => import("@/pages/(base)/home/index.tsx"),
 "(blank)_login-out": () => import("@/pages/(blank)/login-out/index.tsx"),
 "(blank)_login_code-login": () => import("@/pages/(blank)/login/code-login/index.tsx"),

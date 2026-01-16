@@ -1,27 +1,26 @@
-export type ReviewStatus = 'pending' | 'approved' | 'rejected' | 'hidden';
+export type ReviewStatus = 'approved' | 'hidden' | 'pending' | 'rejected';
 
 export interface Review {
-  no: string;
-  name: string;
-  userNo: string;
-  productNo: string;
-  orderNo?: string;
-  rating: number;
-  title?: string;
+  adminReply?: string;
   content: string;
-  status: ReviewStatus;
-  reviewTime: string;
-  isVerifiedPurchase: boolean;
+  createdAt: string;
   helpfulCount: number;
   images?: string[];
-  adminReply?: string;
+  isVerifiedPurchase: boolean;
+  name: string;
+  no: string;
+  orderNo?: string;
+  productNo: string;
+  rating: number;
   replyTime?: string;
-  createdAt: string;
+  reviewTime: string;
+  status: ReviewStatus;
+  title?: string;
   updatedAt: string;
+  userNo: string;
 }
 
 export interface ReviewListResponse {
   list: Review[];
   total: number;
 }
-

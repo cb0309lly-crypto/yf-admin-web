@@ -1,7 +1,8 @@
-import { useTranslation } from 'react-i18next';
-import { useEcharts } from '@/hooks/common/echarts';
-import { useLang } from '@/features/lang';
 import { useMount, useUpdateEffect } from 'ahooks';
+import { useTranslation } from 'react-i18next';
+
+import { useLang } from '@/features/lang';
+import { useEcharts } from '@/hooks/common/echarts';
 import { fetchLineChartData } from '@/service/api/stats';
 
 const LineChart = () => {
@@ -72,7 +73,7 @@ const LineChart = () => {
 
   async function mockData() {
     const { data } = await fetchLineChartData();
-    
+
     if (data) {
       updateOptions(opts => {
         opts.xAxis.data = data.map((item: any) => item.date);

@@ -1,31 +1,30 @@
-export type PromotionType = 'discount' | 'buy_one_get_one' | 'flash_sale' | 'bundle' | 'free_shipping';
-export type PromotionStatus = 'draft' | 'active' | 'paused' | 'ended' | 'cancelled';
+export type PromotionType = 'bundle' | 'buy_one_get_one' | 'discount' | 'flash_sale' | 'free_shipping';
+export type PromotionStatus = 'active' | 'cancelled' | 'draft' | 'ended' | 'paused';
 
 export interface Promotion {
-  no: string;
-  name: string;
-  type: PromotionType;
-  discountValue: number;
-  status: PromotionStatus;
-  startDate: string;
-  endDate: string;
-  description?: string;
-  bannerImage?: string;
-  applicableProducts?: string[];
   applicableCategories?: string[];
-  minimumAmount: number;
-  maximumDiscount?: number;
-  usageLimitPerUser: number;
-  totalUsageLimit?: number;
-  usedCount: number;
-  isFeatured: boolean;
-  priority: number;
+  applicableProducts?: string[];
+  bannerImage?: string;
   createdAt: string;
+  description?: string;
+  discountValue: number;
+  endDate: string;
+  isFeatured: boolean;
+  maximumDiscount?: number;
+  minimumAmount: number;
+  name: string;
+  no: string;
+  priority: number;
+  startDate: string;
+  status: PromotionStatus;
+  totalUsageLimit?: number;
+  type: PromotionType;
   updatedAt: string;
+  usageLimitPerUser: number;
+  usedCount: number;
 }
 
 export interface PromotionListResponse {
   list: Promotion[];
   total: number;
 }
-

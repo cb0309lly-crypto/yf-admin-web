@@ -1,15 +1,25 @@
-import { Button, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag, message, DatePicker, InputNumber, Switch } from 'antd';
-import React, { useEffect, useState } from 'react';
-import SvgIcon from '@/components/SvgIcon';
-import ButtonIcon from '@/components/ButtonIcon';
 import {
-  fetchPromotionList,
-  createPromotion,
-  updatePromotion,
-  deletePromotion
-} from '@/service/api/promotion';
-import type { Promotion } from '@/types/promotion';
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Popconfirm,
+  Select,
+  Space,
+  Switch,
+  Table,
+  Tag,
+  message
+} from 'antd';
 import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+
+import ButtonIcon from '@/components/ButtonIcon';
+import SvgIcon from '@/components/SvgIcon';
+import { createPromotion, deletePromotion, fetchPromotionList, updatePromotion } from '@/service/api/promotion';
+import type { Promotion } from '@/types/promotion';
 
 const PromotionManage: React.FC = () => {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
@@ -55,10 +65,10 @@ const PromotionManage: React.FC = () => {
       const { range, ...rest } = values;
       const submitData = {
         ...rest,
-        startDate: range[0].toISOString(),
-        endDate: range[1].toISOString()
+        endDate: range[1].toISOString(),
+        startDate: range[0].toISOString()
       };
-      
+
       if (isEdit && editing) {
         await updatePromotion(editing.no, submitData);
         message.success('更新成功');
@@ -80,91 +90,124 @@ const PromotionManage: React.FC = () => {
   };
 
   const columns = [
-    { title: '名称', dataIndex: 'name', key: 'name' },
-    { 
-      title: '类型', 
-      dataIndex: 'type', 
+    { dataIndex: 'name', key: 'name', title: '名称' },
+    {
+      dataIndex: 'type',
       key: 'type',
-      render: (type: string) => <Tag color="blue">{type}</Tag>
+      render: (type: string) => <Tag color="blue">{type}</Tag>,
+      title: '类型'
     },
-    { 
-      title: '优惠额度', 
-      dataIndex: 'discountValue', 
+    {
+      dataIndex: 'discountValue',
       key: 'discountValue',
-      render: (val: number) => `¥${val}`
+      render: (val: number) => `¥${val}`,
+      title: '优惠额度'
     },
-    { 
-      title: '周期', 
+    {
       key: 'period',
       render: (_: any, record: Promotion) => (
         <div className="text-12px text-#666">
           {dayjs(record.startDate).format('YYYY-MM-DD')} 至 {dayjs(record.endDate).format('YYYY-MM-DD')}
         </div>
-      )
+      ),
+      title: '周期'
     },
     {
-      title: '状态',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => {
-        const colors: any = { active: 'green', paused: 'orange', draft: 'default', ended: 'red' };
+        const colors: any = { active: 'green', draft: 'default', ended: 'red', paused: 'orange' };
         return <Tag color={colors[status] || 'default'}>{status}</Tag>;
-      }
+      },
+      title: '状态'
     },
     {
-      title: '操作',
       key: 'action',
       render: (_: any, record: Promotion) => (
         <Space>
-          <Button type="link" onClick={() => openModal(record)}>编辑</Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(record.no)}>
-            <Button type="link" danger>删除</Button>
+          <Button
+            type="link"
+            onClick={() => openModal(record)}
+          >
+            编辑
+          </Button>
+          <Popconfirm
+            title="确定删除吗？"
+            onConfirm={() => handleDelete(record.no)}
+          >
+            <Button
+              danger
+              type="link"
+            >
+              删除
+            </Button>
           </Popconfirm>
         </Space>
-      )
+      ),
+      title: '操作'
     }
   ];
 
   return (
     <div className="p-16px">
-      <div className="mb-16px flex justify-between items-center">
-        <h2 className="text-20px font-bold flex items-center">
-          <SvgIcon icon="ant-design:fire-outlined" className="mr-8px" />
+      <div className="mb-16px flex items-center justify-between">
+        <h2 className="flex items-center text-20px font-bold">
+          <SvgIcon
+            className="mr-8px"
+            icon="ant-design:fire-outlined"
+          />
           促销管理
         </h2>
-        <ButtonIcon type="primary" icon="ant-design:plus-outlined" onClick={() => openModal()}>
+        <ButtonIcon
+          icon="ant-design:plus-outlined"
+          type="primary"
+          onClick={() => openModal()}
+        >
           新增促销
         </ButtonIcon>
       </div>
-      <div className="bg-white p-16px rd-8px shadow-sm">
+      <div className="rd-8px bg-white p-16px shadow-sm">
         <Table
           columns={columns}
           dataSource={promotions}
-          rowKey="no"
           loading={loading}
+          rowKey="no"
           pagination={{
             current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
             onChange: (page, pageSize) => loadPromotions(page, pageSize),
-            showTotal: (total) => `共${total}条`
+            pageSize: pagination.pageSize,
+            showTotal: total => `共${total}条`,
+            total: pagination.total
           }}
         />
       </div>
       <Modal
-        title={isEdit ? '编辑促销' : '新增促销'}
+        destroyOnClose
         open={modalOpen}
+        title={isEdit ? '编辑促销' : '新增促销'}
+        width={700}
         onCancel={() => setModalOpen(false)}
         onOk={() => form.submit()}
-        destroyOnClose
-        width={700}
       >
-        <Form form={form} layout="vertical" onFinish={handleOk}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleOk}
+        >
           <div className="grid grid-cols-2 gap-x-16px">
-            <Form.Item name="name" label="促销名称" rules={[{ required: true, message: '请输入促销名称' }]}>
+            <Form.Item
+              label="促销名称"
+              name="name"
+              rules={[{ message: '请输入促销名称', required: true }]}
+            >
               <Input />
             </Form.Item>
-            <Form.Item name="type" label="类型" initialValue="discount" rules={[{ required: true }]}>
+            <Form.Item
+              initialValue="discount"
+              label="类型"
+              name="type"
+              rules={[{ required: true }]}
+            >
               <Select>
                 <Select.Option value="discount">折扣</Select.Option>
                 <Select.Option value="buy_one_get_one">买一送一</Select.Option>
@@ -172,27 +215,60 @@ const PromotionManage: React.FC = () => {
                 <Select.Option value="free_shipping">免运费</Select.Option>
               </Select>
             </Form.Item>
-            <Form.Item name="discountValue" label="优惠数值" initialValue={0}>
-              <InputNumber className="w-full" min={0} />
+            <Form.Item
+              initialValue={0}
+              label="优惠数值"
+              name="discountValue"
+            >
+              <InputNumber
+                className="w-full"
+                min={0}
+              />
             </Form.Item>
-            <Form.Item name="priority" label="优先级" initialValue={0}>
-              <InputNumber className="w-full" min={0} />
+            <Form.Item
+              initialValue={0}
+              label="优先级"
+              name="priority"
+            >
+              <InputNumber
+                className="w-full"
+                min={0}
+              />
             </Form.Item>
-            <Form.Item name="range" label="活动周期" rules={[{ required: true, message: '请选择周期' }]} className="col-span-2">
-              <DatePicker.RangePicker className="w-full" showTime />
+            <Form.Item
+              className="col-span-2"
+              label="活动周期"
+              name="range"
+              rules={[{ message: '请选择周期', required: true }]}
+            >
+              <DatePicker.RangePicker
+                showTime
+                className="w-full"
+              />
             </Form.Item>
-            <Form.Item name="status" label="状态" initialValue="draft">
+            <Form.Item
+              initialValue="draft"
+              label="状态"
+              name="status"
+            >
               <Select>
                 <Select.Option value="draft">草稿</Select.Option>
                 <Select.Option value="active">启用</Select.Option>
                 <Select.Option value="paused">暂停</Select.Option>
               </Select>
             </Form.Item>
-            <Form.Item name="isFeatured" label="是否精选" valuePropName="checked">
+            <Form.Item
+              label="是否精选"
+              name="isFeatured"
+              valuePropName="checked"
+            >
               <Switch />
             </Form.Item>
           </div>
-          <Form.Item name="description" label="描述">
+          <Form.Item
+            label="描述"
+            name="description"
+          >
             <Input.TextArea rows={2} />
           </Form.Item>
         </Form>
@@ -209,4 +285,3 @@ export const handle = {
 };
 
 export default PromotionManage;
-

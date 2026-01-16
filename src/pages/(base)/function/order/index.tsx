@@ -35,7 +35,10 @@ const OrderManage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Order | null>(null);
+  const [logisticsModalVisible, setLogisticsModalVisible] = useState(false);
+  const [logisticsOrderNo, setLogisticsOrderNo] = useState<string | null>(null);
   const [form] = Form.useForm();
+  const [logisticsForm] = Form.useForm();
   const isEdit = Boolean(editing);
   const lastQuery = useRef({ page: 1, pageSize: PAGE_SIZE });
   const [searchForm] = Form.useForm();
@@ -86,7 +89,6 @@ const OrderManage: React.FC = () => {
   // 打开新增/编辑弹窗
   const openModal = async (order?: Order) => {
     setEditing(order || null);
-    setModalOpen(true);
 
     if (order) {
       // 获取详情
@@ -107,15 +109,14 @@ const OrderManage: React.FC = () => {
       const submitData: Partial<Order> = {
         ...values
       };
-      if (isEdit && editing) {
-        submitData.no = editing.no;
-        await updateOrder(submitData);
-        message.success('订单编辑成功');
-      } else {
-        await createOrder(submitData);
-        message.success('订单添加成功');
+      if (!editing) {
+        return;
       }
-      setModalOpen(false);
+
+      submitData.no = editing.no;
+      await updateOrder(submitData);
+      message.success('订单编辑成功');
+      setEditing(null);
       loadOrders(pagination.current, pagination.pageSize);
     } catch (error) {
       console.error('提交失败:', error);
@@ -143,6 +144,31 @@ const OrderManage: React.FC = () => {
   // 订单创建成功
   const handleOrderCreateSuccess = () => {
     loadOrders(pagination.current, pagination.pageSize);
+  };
+
+  const openLogisticsModal = (order: Order) => {
+    setLogisticsOrderNo(order.no);
+    logisticsForm.setFieldsValue({ logisticsNo: order.logisticsNo || '' });
+    setLogisticsModalVisible(true);
+  };
+
+  const handleLogisticsSubmit = async () => {
+    try {
+      if (!logisticsOrderNo) {
+        message.error('订单编号为空');
+        return;
+      }
+
+      const values = await logisticsForm.validateFields();
+      await updateOrder({ logisticsNo: values.logisticsNo, no: logisticsOrderNo });
+      message.success('物流单号更新成功');
+      setLogisticsModalVisible(false);
+      setLogisticsOrderNo(null);
+      logisticsForm.resetFields();
+      loadOrders(pagination.current, pagination.pageSize);
+    } catch (error) {
+      console.error('物流单号提交失败:', error);
+    }
   };
 
   const columns = [
@@ -186,6 +212,13 @@ const OrderManage: React.FC = () => {
             onClick={() => openModal(record)}
           >
             编辑
+          </Button>
+          <Button
+            icon={<SvgIcon icon="ant-design:car-outlined" />}
+            type="link"
+            onClick={() => openLogisticsModal(record)}
+          >
+            物流
           </Button>
           <Select
             options={ORDER_STATUS_OPTIONS.filter(opt => opt.value !== '')}
@@ -463,17 +496,24 @@ const OrderManage: React.FC = () => {
 
       {/* 物流单号弹窗 */}
       <Modal
-        title="填写物流单号"
-        open={logisticsModalVisible}
-        onCancel={() => setLogisticsModalVisible(false)}
-        onOk={handleLogisticsSubmit}
         destroyOnClose
+        open={logisticsModalVisible}
+        title="填写物流单号"
+        onOk={handleLogisticsSubmit}
+        onCancel={() => {
+          setLogisticsModalVisible(false);
+          setLogisticsOrderNo(null);
+          logisticsForm.resetFields();
+        }}
       >
-        <Form form={logisticsForm} layout="vertical">
+        <Form
+          form={logisticsForm}
+          layout="vertical"
+        >
           <Form.Item
-            name="logisticsNo"
             label="物流单号"
-            rules={[{ required: true, message: '请输入物流单号' }]}
+            name="logisticsNo"
+            rules={[{ message: '请输入物流单号', required: true }]}
           >
             <Input placeholder="请输入物流单号" />
           </Form.Item>

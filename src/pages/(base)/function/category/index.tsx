@@ -1,13 +1,14 @@
-import { Button, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag, message, TreeSelect } from 'antd';
+import { Button, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag, TreeSelect, message } from 'antd';
 import React, { useEffect, useState } from 'react';
-import SvgIcon from '@/components/SvgIcon';
+
 import ButtonIcon from '@/components/ButtonIcon';
+import SvgIcon from '@/components/SvgIcon';
 import {
+  createCategory,
+  deleteCategory,
   fetchCategoryList,
   fetchCategoryTree,
-  createCategory,
-  updateCategory,
-  deleteCategory
+  updateCategory
 } from '@/service/api/category';
 import type { Category } from '@/types/category';
 
@@ -25,7 +26,7 @@ const CategoryManage: React.FC = () => {
     try {
       const { data } = await fetchCategoryList({ page: 1, pageSize: 100 });
       setCategories(data?.list ?? []);
-      
+
       const { data: treeData } = await fetchCategoryTree();
       setCategoryTree(formatTreeData(treeData || []));
     } catch (e) {
@@ -37,9 +38,9 @@ const CategoryManage: React.FC = () => {
 
   const formatTreeData = (data: Category[]) => {
     return data.map(item => ({
+      children: item.children ? formatTreeData(item.children) : [],
       title: item.name,
-      value: item.no,
-      children: item.children ? formatTreeData(item.children) : []
+      value: item.no
     }));
   };
 
@@ -80,81 +81,126 @@ const CategoryManage: React.FC = () => {
   };
 
   const columns = [
-    { title: '名称', dataIndex: 'name', key: 'name' },
-    { title: '级别', dataIndex: 'categoryLevel', key: 'categoryLevel', render: (level: number) => <Tag color="blue">{level}级</Tag> },
-    { title: '排序', dataIndex: 'sort', key: 'sort' },
-    { 
-      title: '状态', 
-      dataIndex: 'status', 
+    { dataIndex: 'name', key: 'name', title: '名称' },
+    {
+      dataIndex: 'categoryLevel',
+      key: 'categoryLevel',
+      render: (level: number) => <Tag color="blue">{level}级</Tag>,
+      title: '级别'
+    },
+    { dataIndex: 'sort', key: 'sort', title: '排序' },
+    {
+      dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
-        <Tag color={status === 'active' ? 'green' : 'red'}>
-          {status === 'active' ? '激活' : '禁用'}
-        </Tag>
-      )
+        <Tag color={status === 'active' ? 'green' : 'red'}>{status === 'active' ? '激活' : '禁用'}</Tag>
+      ),
+      title: '状态'
     },
     {
-      title: '操作',
       key: 'action',
       render: (_: any, record: Category) => (
         <Space>
-          <Button type="link" onClick={() => openModal(record)}>编辑</Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(record.no)}>
-            <Button type="link" danger>删除</Button>
+          <Button
+            type="link"
+            onClick={() => openModal(record)}
+          >
+            编辑
+          </Button>
+          <Popconfirm
+            title="确定删除吗？"
+            onConfirm={() => handleDelete(record.no)}
+          >
+            <Button
+              danger
+              type="link"
+            >
+              删除
+            </Button>
           </Popconfirm>
         </Space>
-      )
+      ),
+      title: '操作'
     }
   ];
 
   return (
     <div className="p-16px">
-      <div className="mb-16px flex justify-between items-center">
-        <h2 className="text-20px font-bold flex items-center">
-          <SvgIcon icon="ant-design:appstore-outlined" className="mr-8px" />
+      <div className="mb-16px flex items-center justify-between">
+        <h2 className="flex items-center text-20px font-bold">
+          <SvgIcon
+            className="mr-8px"
+            icon="ant-design:appstore-outlined"
+          />
           分类管理
         </h2>
-        <ButtonIcon type="primary" icon="ant-design:plus-outlined" onClick={() => openModal()}>
+        <ButtonIcon
+          icon="ant-design:plus-outlined"
+          type="primary"
+          onClick={() => openModal()}
+        >
           新增分类
         </ButtonIcon>
       </div>
-      <div className="bg-white p-16px rd-8px shadow-sm">
+      <div className="rd-8px bg-white p-16px shadow-sm">
         <Table
           columns={columns}
           dataSource={categories}
-          rowKey="no"
           loading={loading}
           pagination={false}
+          rowKey="no"
         />
       </div>
       <Modal
-        title={isEdit ? '编辑分类' : '新增分类'}
+        destroyOnClose
         open={modalOpen}
+        title={isEdit ? '编辑分类' : '新增分类'}
         onCancel={() => setModalOpen(false)}
         onOk={() => form.submit()}
-        destroyOnClose
       >
-        <Form form={form} layout="vertical" onFinish={handleOk}>
-          <Form.Item name="name" label="名称" rules={[{ required: true, message: '请输入名称' }]}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleOk}
+        >
+          <Form.Item
+            label="名称"
+            name="name"
+            rules={[{ message: '请输入名称', required: true }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="parentId" label="上级分类">
+          <Form.Item
+            label="上级分类"
+            name="parentId"
+          >
             <TreeSelect
               allowClear
-              treeData={categoryTree}
               placeholder="请选择上级分类（可选）"
+              treeData={categoryTree}
             />
           </Form.Item>
-          <Form.Item name="sort" label="排序" initialValue={0}>
+          <Form.Item
+            initialValue={0}
+            label="排序"
+            name="sort"
+          >
             <Input type="number" />
           </Form.Item>
-          <Form.Item name="status" label="状态" initialValue="active">
+          <Form.Item
+            initialValue="active"
+            label="状态"
+            name="status"
+          >
             <Select>
               <Select.Option value="active">激活</Select.Option>
               <Select.Option value="inactive">禁用</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="description" label="描述">
+          <Form.Item
+            label="描述"
+            name="description"
+          >
             <Input.TextArea />
           </Form.Item>
         </Form>
@@ -171,4 +217,3 @@ export const handle = {
 };
 
 export default CategoryManage;
-

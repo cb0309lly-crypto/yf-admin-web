@@ -1,7 +1,8 @@
-import { useTranslation } from 'react-i18next';
-import { useEcharts } from '@/hooks/common/echarts';
-import { useLang } from '@/features/lang';
 import { useMount, useUpdateEffect } from 'ahooks';
+import { useTranslation } from 'react-i18next';
+
+import { useLang } from '@/features/lang';
+import { useEcharts } from '@/hooks/common/echarts';
 import { fetchPieChartData } from '@/service/api/stats';
 
 const PieChart = () => {

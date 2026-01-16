@@ -2,41 +2,40 @@ import { request } from '@/service/request';
 import type { Category, CategoryListResponse } from '@/types/category';
 
 export const fetchCategoryList = (params: {
+  keyword?: string;
   page?: number;
   pageSize?: number;
-  keyword?: string;
-  status?: string;
   parentId?: string;
+  status?: string;
 }) =>
   request<CategoryListResponse>({
-    url: '/category/list',
     method: 'GET',
     params,
+    url: '/category/list'
   });
 
 export const fetchCategoryTree = () =>
   request<Category[]>({
-    url: '/category/tree/list',
     method: 'GET',
+    url: '/category/tree/list'
   });
 
 export const createCategory = (data: Partial<Category>) =>
   request<Category>({
-    url: '/category',
-    method: 'POST',
     data,
+    method: 'POST',
+    url: '/category'
   });
 
 export const updateCategory = (id: string, data: Partial<Category>) =>
   request<Category>({
-    url: `/category/${id}`,
-    method: 'PUT',
     data,
+    method: 'PUT',
+    url: `/category/${id}`
   });
 
 export const deleteCategory = (id: string) =>
   request({
-    url: `/category/${id}`,
     method: 'DELETE',
+    url: `/category/${id}`
   });
-

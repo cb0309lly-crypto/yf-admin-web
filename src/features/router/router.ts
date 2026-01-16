@@ -24,7 +24,8 @@ function initRouter() {
     if (!matchRoute) return true;
 
     if (matchRoute) {
-      return matchRoute[1].route.path === '*';
+      const lastMatch = matchRoute[matchRoute.length - 1];
+      return lastMatch?.route?.path === '*';
     }
 
     return false;

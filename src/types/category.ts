@@ -1,21 +1,20 @@
 export type CategoryStatus = 'active' | 'inactive';
 
 export interface Category {
-  no: string;
-  name: string;
+  categoryLevel: number;
+  children?: Category[];
+  createdAt: string;
   description?: string;
   icon?: string;
-  status: CategoryStatus;
+  name: string;
+  no: string;
   parentId?: string;
   sort: number;
-  categoryLevel: number;
-  createdAt: string;
+  status: CategoryStatus;
   updatedAt: string;
-  children?: Category[];
 }
 
 export interface CategoryListResponse {
   list: Category[];
   total: number;
 }
-

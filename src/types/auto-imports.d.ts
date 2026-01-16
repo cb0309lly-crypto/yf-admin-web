@@ -74,6 +74,7 @@ declare global {
   const NavLink: typeof import('react-router-dom')['NavLink']
   const Navigate: typeof import('react-router-dom')['Navigate']
   const NumberTicker: typeof import('../components/NumberTicker')['default']
+  const OrderCreateModal: typeof import('../components/OrderCreateModal')['default']
   const Outlet: typeof import('react-router-dom')['Outlet']
   const PinToggler: typeof import('../components/PinToggler')['default']
   const Route: typeof import('react-router-dom')['Route']

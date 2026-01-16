@@ -1,29 +1,28 @@
 export type CouponType = 'discount' | 'fixed_amount' | 'free_shipping' | 'percentage';
-export type CouponStatus = 'active' | 'inactive' | 'expired' | 'used';
+export type CouponStatus = 'active' | 'expired' | 'inactive' | 'used';
 
 export interface Coupon {
-  no: string;
-  name: string;
-  userNo?: string;
-  type: CouponType;
-  value: number;
+  applicableCategories?: string[];
+  applicableProducts?: string[];
+  code: string;
+  createdAt: string;
+  description?: string;
+  isGlobal: boolean;
   minimumAmount: number;
+  name: string;
+  no: string;
   status: CouponStatus;
-  validFrom: string;
-  validUntil: string;
+  type: CouponType;
+  updatedAt: string;
   usageLimit: number;
   usedCount: number;
-  code: string;
-  description?: string;
-  applicableProducts?: string[];
-  applicableCategories?: string[];
-  isGlobal: boolean;
-  createdAt: string;
-  updatedAt: string;
+  userNo?: string;
+  validFrom: string;
+  validUntil: string;
+  value: number;
 }
 
 export interface CouponListResponse {
   list: Coupon[];
   total: number;
 }
-

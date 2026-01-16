@@ -2,41 +2,40 @@ import { request } from '@/service/request';
 import type { Promotion, PromotionListResponse } from '@/types/promotion';
 
 export const fetchPromotionList = (params: {
+  keyword?: string;
   page: number;
   pageSize: number;
-  keyword?: string;
   status?: string;
   type?: string;
 }) =>
   request<PromotionListResponse>({
-    url: '/promotion/list',
     method: 'GET',
     params,
+    url: '/promotion/list'
   });
 
 export const fetchActivePromotions = () =>
   request<Promotion[]>({
-    url: '/promotion/active/list',
     method: 'GET',
+    url: '/promotion/active/list'
   });
 
 export const createPromotion = (data: Partial<Promotion>) =>
   request<Promotion>({
-    url: '/promotion',
-    method: 'POST',
     data,
+    method: 'POST',
+    url: '/promotion'
   });
 
 export const updatePromotion = (id: string, data: Partial<Promotion>) =>
   request<Promotion>({
-    url: `/promotion/${id}`,
-    method: 'PUT',
     data,
+    method: 'PUT',
+    url: `/promotion/${id}`
   });
 
 export const deletePromotion = (id: string) =>
   request({
-    url: `/promotion/${id}`,
     method: 'DELETE',
+    url: `/promotion/${id}`
   });
-

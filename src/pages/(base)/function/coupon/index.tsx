@@ -1,15 +1,24 @@
-import { Button, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag, message, DatePicker, InputNumber } from 'antd';
-import React, { useEffect, useState } from 'react';
-import SvgIcon from '@/components/SvgIcon';
-import ButtonIcon from '@/components/ButtonIcon';
 import {
-  fetchCouponList,
-  createCoupon,
-  updateCoupon,
-  deleteCoupon
-} from '@/service/api/coupon';
-import type { Coupon } from '@/types/coupon';
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Popconfirm,
+  Select,
+  Space,
+  Table,
+  Tag,
+  message
+} from 'antd';
 import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+
+import ButtonIcon from '@/components/ButtonIcon';
+import SvgIcon from '@/components/SvgIcon';
+import { createCoupon, deleteCoupon, fetchCouponList, updateCoupon } from '@/service/api/coupon';
+import type { Coupon } from '@/types/coupon';
 
 const CouponManage: React.FC = () => {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -58,7 +67,7 @@ const CouponManage: React.FC = () => {
         validFrom: range[0].toISOString(),
         validUntil: range[1].toISOString()
       };
-      
+
       if (isEdit && editing) {
         await updateCoupon(editing.no, submitData);
         message.success('更新成功');
@@ -80,132 +89,206 @@ const CouponManage: React.FC = () => {
   };
 
   const columns = [
-    { title: '名称', dataIndex: 'name', key: 'name' },
-    { title: '代码', dataIndex: 'code', key: 'code' },
-    { 
-      title: '类型', 
-      dataIndex: 'type', 
+    { dataIndex: 'name', key: 'name', title: '名称' },
+    { dataIndex: 'code', key: 'code', title: '代码' },
+    {
+      dataIndex: 'type',
       key: 'type',
-      render: (type: string) => <Tag>{type}</Tag>
+      render: (type: string) => <Tag>{type}</Tag>,
+      title: '类型'
     },
-    { 
-      title: '面值', 
-      dataIndex: 'value', 
+    {
+      dataIndex: 'value',
       key: 'value',
-      render: (val: number, record: Coupon) => record.type === 'percentage' ? `${val}%` : `¥${val}`
+      render: (val: number, record: Coupon) => (record.type === 'percentage' ? `${val}%` : `¥${val}`),
+      title: '面值'
     },
-    { 
-      title: '门槛', 
-      dataIndex: 'minimumAmount', 
+    {
+      dataIndex: 'minimumAmount',
       key: 'minimumAmount',
-      render: (val: number) => `¥${val}`
+      render: (val: number) => `¥${val}`,
+      title: '门槛'
     },
-    { 
-      title: '有效期', 
+    {
       key: 'validity',
       render: (_: any, record: Coupon) => (
         <div className="text-12px text-#666">
           {dayjs(record.validFrom).format('YYYY-MM-DD')} 至 {dayjs(record.validUntil).format('YYYY-MM-DD')}
         </div>
-      )
+      ),
+      title: '有效期'
     },
     {
-      title: '状态',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => (
-        <Tag color={status === 'active' ? 'green' : 'orange'}>{status}</Tag>
-      )
+      render: (status: string) => <Tag color={status === 'active' ? 'green' : 'orange'}>{status}</Tag>,
+      title: '状态'
     },
     {
-      title: '操作',
       key: 'action',
       render: (_: any, record: Coupon) => (
         <Space>
-          <Button type="link" onClick={() => openModal(record)}>编辑</Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(record.no)}>
-            <Button type="link" danger>删除</Button>
+          <Button
+            type="link"
+            onClick={() => openModal(record)}
+          >
+            编辑
+          </Button>
+          <Popconfirm
+            title="确定删除吗？"
+            onConfirm={() => handleDelete(record.no)}
+          >
+            <Button
+              danger
+              type="link"
+            >
+              删除
+            </Button>
           </Popconfirm>
         </Space>
-      )
+      ),
+      title: '操作'
     }
   ];
 
   return (
     <div className="p-16px">
-      <div className="mb-16px flex justify-between items-center">
-        <h2 className="text-20px font-bold flex items-center">
-          <SvgIcon icon="ant-design:gift-outlined" className="mr-8px" />
+      <div className="mb-16px flex items-center justify-between">
+        <h2 className="flex items-center text-20px font-bold">
+          <SvgIcon
+            className="mr-8px"
+            icon="ant-design:gift-outlined"
+          />
           优惠券管理
         </h2>
-        <ButtonIcon type="primary" icon="ant-design:plus-outlined" onClick={() => openModal()}>
+        <ButtonIcon
+          icon="ant-design:plus-outlined"
+          type="primary"
+          onClick={() => openModal()}
+        >
           新增优惠券
         </ButtonIcon>
       </div>
-      <div className="bg-white p-16px rd-8px shadow-sm">
+      <div className="rd-8px bg-white p-16px shadow-sm">
         <Table
           columns={columns}
           dataSource={coupons}
-          rowKey="no"
           loading={loading}
+          rowKey="no"
           pagination={{
             current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
             onChange: (page, pageSize) => loadCoupons(page, pageSize),
-            showTotal: (total) => `共${total}条`
+            pageSize: pagination.pageSize,
+            showTotal: total => `共${total}条`,
+            total: pagination.total
           }}
         />
       </div>
       <Modal
-        title={isEdit ? '编辑优惠券' : '新增优惠券'}
+        destroyOnClose
         open={modalOpen}
+        title={isEdit ? '编辑优惠券' : '新增优惠券'}
+        width={600}
         onCancel={() => setModalOpen(false)}
         onOk={() => form.submit()}
-        destroyOnClose
-        width={600}
       >
-        <Form form={form} layout="vertical" onFinish={handleOk}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleOk}
+        >
           <div className="grid grid-cols-2 gap-x-16px">
-            <Form.Item name="name" label="名称" rules={[{ required: true, message: '请输入名称' }]}>
+            <Form.Item
+              label="名称"
+              name="name"
+              rules={[{ message: '请输入名称', required: true }]}
+            >
               <Input />
             </Form.Item>
-            <Form.Item name="code" label="代码" rules={[{ required: true, message: '请输入代码' }]}>
+            <Form.Item
+              label="代码"
+              name="code"
+              rules={[{ message: '请输入代码', required: true }]}
+            >
               <Input />
             </Form.Item>
-            <Form.Item name="type" label="类型" initialValue="fixed_amount" rules={[{ required: true }]}>
+            <Form.Item
+              initialValue="fixed_amount"
+              label="类型"
+              name="type"
+              rules={[{ required: true }]}
+            >
               <Select>
                 <Select.Option value="fixed_amount">固定金额</Select.Option>
                 <Select.Option value="percentage">百分比</Select.Option>
                 <Select.Option value="free_shipping">免运费</Select.Option>
               </Select>
             </Form.Item>
-            <Form.Item name="value" label="面值" initialValue={0} rules={[{ required: true }]}>
-              <InputNumber className="w-full" min={0} />
+            <Form.Item
+              initialValue={0}
+              label="面值"
+              name="value"
+              rules={[{ required: true }]}
+            >
+              <InputNumber
+                className="w-full"
+                min={0}
+              />
             </Form.Item>
-            <Form.Item name="minimumAmount" label="最小订单金额" initialValue={0}>
-              <InputNumber className="w-full" min={0} />
+            <Form.Item
+              initialValue={0}
+              label="最小订单金额"
+              name="minimumAmount"
+            >
+              <InputNumber
+                className="w-full"
+                min={0}
+              />
             </Form.Item>
-            <Form.Item name="usageLimit" label="使用限制次数" initialValue={1}>
-              <InputNumber className="w-full" min={1} />
+            <Form.Item
+              initialValue={1}
+              label="使用限制次数"
+              name="usageLimit"
+            >
+              <InputNumber
+                className="w-full"
+                min={1}
+              />
             </Form.Item>
-            <Form.Item name="range" label="有效日期" rules={[{ required: true, message: '请选择有效期' }]} className="col-span-2">
+            <Form.Item
+              className="col-span-2"
+              label="有效日期"
+              name="range"
+              rules={[{ message: '请选择有效期', required: true }]}
+            >
               <DatePicker.RangePicker className="w-full" />
             </Form.Item>
-            <Form.Item name="isGlobal" label="是否通用" valuePropName="checked" initialValue={false}>
+            <Form.Item
+              initialValue={false}
+              label="是否通用"
+              name="isGlobal"
+              valuePropName="checked"
+            >
               <Select>
                 <Select.Option value={true}>是</Select.Option>
                 <Select.Option value={false}>否</Select.Option>
               </Select>
             </Form.Item>
-            <Form.Item name="status" label="状态" initialValue="active">
+            <Form.Item
+              initialValue="active"
+              label="状态"
+              name="status"
+            >
               <Select>
                 <Select.Option value="active">激活</Select.Option>
                 <Select.Option value="inactive">禁用</Select.Option>
               </Select>
             </Form.Item>
           </div>
-          <Form.Item name="description" label="描述">
+          <Form.Item
+            label="描述"
+            name="description"
+          >
             <Input.TextArea rows={2} />
           </Form.Item>
         </Form>
@@ -222,4 +305,3 @@ export const handle = {
 };
 
 export default CouponManage;
-
